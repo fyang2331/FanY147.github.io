@@ -1,111 +1,62 @@
-<!DOCTYPE html>
-<html>
+{% extends '_layout.swig' %}
+{% import '_macro/post-collapse.swig' as post_template %}
+{% import '_macro/sidebar.swig' as sidebar_template %}
 
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<meta name="theme-color" content="#33474d">
-	<title>MyBlog</title>
-	<link rel="stylesheet" href="/css/style.css" />
-	
-      <link rel="alternate" href="/atom.xml" title="MyBlog" type="application/atom+xml">
-    
-<meta name="generator" content="Hexo 6.1.0"></head>
+{% block title %}{{ __('title.archive') }} | {{ config.title }}{% endblock %}
 
-<body>
+{% block page_class %}page-archive{% endblock %}
 
-	<header class="header">
-		<nav class="header__nav">
-			
-				<a href="/archives" class="header__link">Archive</a>
-			
-				<a href="/tags" class="header__link">Tags</a>
-			
-				<a href="/atom.xml" class="header__link">RSS</a>
-			
-		</nav>
-		<h1 class="header__title"><a href="/">MyBlog</a></h1>
-		<h2 class="header__subtitle">READ&LEARNING&LIFE&PHOTOGRAPHY</h2>
-	</header>
+{% block content %}
 
-	<main>
-		<h1>Archive</h1>
+  {#####################}
+  {### ARCHIVE BLOCK ###}
+  {#####################}
+  <div class="post-block archive">
+    <div id="posts" class="posts-collapse">
+      <span class="archive-move-on"></span>
 
+      <span class="archive-page-counter">
+        {% set cheers %}
+        {% set posts_length = site.posts.length %}
+        {% if posts_length > 210 %} {% set cheers = 'excellent' %}
+          {% elif posts_length > 130 %} {% set cheers = 'great' %}
+          {% elif posts_length > 80 %} {% set cheers = 'good' %}
+          {% elif posts_length > 50 %} {% set cheers = 'nice' %}
+          {% elif posts_length > 30 %} {% set cheers = 'ok' %}
+        {% else %}
+          {% set cheers = 'um' %}
+        {% endif %}
+        {{ __('cheers.' + cheers) }}! {{ _p("counter.archive_posts", site.posts.length) }} {{ __('keep_on') }}
+      </span>
 
+      {% for post in page.posts %}
 
+        {# Show year #}
+        {% set year %}
+        {% set post.year = date(post.date, 'YYYY') %}
 
+        {% if post.year !== year %}
+          {% set year = post.year %}
+          <div class="collection-title">
+            <{% if theme.seo %}h2{% else %}h1{% endif %} class="archive-year" id="archive-year-{{ year }}">{{ year }}</{% if theme.seo %}h2{% else %}h1{% endif %}>
+          </div>
+        {% endif %}
+        {# endshow #}
 
-<ul class="archive">
-	
-	
-		<li class="archive__year archive__expendable ">
-			<span>2022</span>
-			<ul>
-				
-					<li class="archive__month archive__expendable">
-						<span>April</span>
-						<ul>
-							
-								<li class="archive__entry"><a href="/2022/04/30/My-New-Post/">My New Post</a></li>
-							
-								<li class="archive__entry"><a href="/2022/04/30/hello-world/">LEARNING</a></li>
-							
-						</ul>
-					</li>
+        {{ post_template.render(post) }}
 
-				
-			</ul>
-		</li>
-		
-	
-</ul>
+      {% endfor %}
 
-<script>
-	const expandables = document.querySelectorAll('.archive__expendable')
-	for(let i = 0; i < expandables.length; i++) {
-		expandables[i].addEventListener('click', (e) => {
-			e.stopPropagation()
-			expandables[i].classList.toggle('archive__expendable_collapsed')
-		})
-	}
-</script>
+    </div>
+  </div>
+  {#########################}
+  {### END ARCHIVE BLOCK ###}
+  {#########################}
 
-	</main>
+  {% include '_partials/pagination.swig' %}
 
-	<footer class="footer">
-	<div class="footer-content">
-		
-	      <div class="footer__element">
-	<p>Hi there, <br />welcome to my Blog glad you found it. Have a look around, will you?</p>
-</div>
+{% endblock %}
 
-	    
-	      <div class="footer__element">
-	<h5>Check out</h5>
-	<ul class="footer-links">
-		<li class="footer-links__link"><a href="/archives">Archive</a></li>
-		
-		  <li class="footer-links__link"><a href="/atom.xml">RSS</a></li>
-	    
-		<li class="footer-links__link"><a href="/about">about page</a></li>
-		<li class="footer-links__link"><a href="/tags">Tags</a></li>
-		<li class="footer-links__link"><a href="/categories">Categories</a></li>
-	</ul>
-</div>
-
-	    
-
-		<div class="footer-credit">
-			<span>© 2022 Fresh Y | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/HoverBaum/meilidu-hexo">MeiliDu</a></span>
-		</div>
-
-	</div>
-
-
-</footer>
-
-
-
-</body>
-
-</html>
+{% block sidebar %}
+  {{ sidebar_template.render(false) }}
+{% endblock %}
