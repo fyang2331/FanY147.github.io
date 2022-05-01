@@ -43,7 +43,9 @@
 
 	
 		<h1 id="一、JAVA内存区域与内存溢出异常"><a href="#一、JAVA内存区域与内存溢出异常" class="headerlink" title="一、JAVA内存区域与内存溢出异常"></a>一、JAVA内存区域与内存溢出异常</h1><h2 id="1-1概述"><a href="#1-1概述" class="headerlink" title="1.1概述"></a>1.1概述</h2><p>​		对于JAVA程序员来说，在虚拟机自动内存管理机制的帮助下，不再需要为每一个new操作去写配对的delete&#x2F;free代码，不容易出现内存泄露和内存溢出问题，由虚拟机管理内存让一切都看起来很美好。不过，也正是因为JAVA程序员把内存控制的权利交给了JAVA虚拟机，一旦出现内存泄漏和溢出方面的问题，如果不了解虚拟机是怎样使用内存的，那么排查错误将成为一项异常艰难的工作。</p>
-<h2 id="1-2运行时数据区域"><a href="#1-2运行时数据区域" class="headerlink" title="1.2运行时数据区域"></a>1.2运行时数据区域</h2><p>​		JAVA虚拟机在执行JAVA程序的过程中会把它所管理的内存化为若干个不同的数据区域。这些区域都有各自的用途，以及创建和销毁的时间，有的区域随着虚拟机进程的启动而存在，有些区域则依赖用户线程的启动和结束而建立和销毁，根据最新的JAVA虚拟机规范的规定，JAVA虚拟机所管理的内存将会包括以下几个运行时数据区域，如图所示1-1所示。<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202204301922679.png"></figure></p>
+<h2 id="1-2运行时数据区域"><a href="#1-2运行时数据区域" class="headerlink" title="1.2运行时数据区域"></a>1.2运行时数据区域</h2><p>​		JAVA虚拟机在执行JAVA程序的过程中会把它所管理的内存化为若干个不同的数据区域。这些区域都有各自的用途，以及创建和销毁的时间，有的区域随着虚拟机进程的启动而存在，有些区域则依赖用户线程的启动和结束而建立和销毁，根据最新的JAVA虚拟机规范的规定，JAVA虚拟机所管理的内存将会包括以下几个运行时数据区域，如图所示1-1所示。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202204301922679.png" style="zoom:67%;" /></figure>
+
 <h3 id="1-2-1程序计数器"><a href="#1-2-1程序计数器" class="headerlink" title="1.2.1程序计数器"></a>1.2.1程序计数器</h3><p>​		程序计数器是一块较小的内存空间，它可以看作是<strong>当前线程所执行的字节码的行号指示器</strong>。在虚拟机的概念模型里，字节码解释器工作时就是通过改变这个计数器的值来选取下一条需要执行的字节码指令，分支、循环、跳转、异常处理、线程恢复等基础功能都需要以来这个计数器来完成。</p>
 <p>​		由于JAVA虚拟机的多线程是通过线程轮流切换并分配执行器执行时间的方式来实现的，在任何一个确定的时刻，一个处理器（对于多核处理器来说是一个内核）都会执行一条线程中的指令。因此，为了线程切换后能恢复到正确的执行位置，<strong>每个线程都需要有一个独立的程序计数器</strong>。各条线程之间计数器<strong>互不影响，独立存储</strong>，我们称这类内存区域为“线程私有”的内存。</p>
 <p>​		如果线程正在实行的是一个JAVA方法，这个计数器记录的是正在执行的虚拟机字节码指令的地址；如果正在执行的是Native方法，这个计数器值则为空（Undefined）。此内存区域是唯一一个在JAVA虚拟机规范中没有任何规定OOM情况的区域。</p>
@@ -146,7 +148,9 @@
 <p>​		在类加载通过后，接下来虚拟机额将为新生对象分配内存，对象所需内存的大小在类加载完成后便可完全确定，为对象分配空间的任务等同于把一块确定大小的内存从堆中划分出来。假设JAVA堆中内存时完全规整的，所有用过的内存都放在一遍，空闲的内存放在另一边，中间放着一个指针作为分界点的治时期，那所分配内存仅仅是把那个指针向空闲内存那边挪动一段距离，距离大小等同于要分配的对象大小，这种分配方法称为“指针碰撞”。如果JAVA堆中的内存不是规整的，已使用的内存和空闲的内存交错分布，那么就要依靠虚拟机维护的一个列表，记录哪块内存块是可用的，在分配时从列表中找到一块足够大的内存划分给对象实例，并更新列表上的记录，这种分配方式称为“空闲列表”。选择那种分配方式由堆决定，而堆是否规整又由所采用的垃圾收集器是否有压缩整理的功能决定，因此，在使用Serial、ParNew等带有压缩过程的收集器时，系统采用的是指针碰撞，而使用CMS这种已于标记清除的算法收集器时，采用空闲列表。</p>
 <p>​		除了划分内存外，在对象创建时还要考虑多线程的影响，在并发情况下，如果出现正在给对象A分配内存，指针还没来得及修改，对象B又同时使用了原来指针来分配内存的情况。有两种解决方案，一种是对分配内存空间的动作进行同步处理——利用CAS配上失败重试的方式保证更新操作的原子性；另一种是把内存分配的动作按照线程划分在不同的空间上进行，即每个线程在JAVA堆中预先分配一小块内存，称为本地线程分配缓冲（Thread Local Allocation Buffer，TLAB）。</p>
 <p>​		内存分配完成之后虚拟机需要将分配的内存空间都初始化为0，这一操作保证了对象的实例字段在JAVA代码中可以不赋初值就直接使用，程序能访问到这些字段的数据类型所对应了0值。接下来，虚拟机要对对象进行必要的设置，例如这个对象是那个类的实例、如何才能找到类的元数据信息、对象的哈希码、对象的GC分代年龄等信息。这些信息放在对象的对象头之中，根据虚拟机当前的运行状态的不同，如是否启用偏向锁等，对象头会有不同的设置方式。</p>
-<p>​		虚拟机部分的操作基本完成后，从JAVA程序的角度看，对象创建还需&lt;“init”&gt;方法的执行，所有的字段赋值并初始化。流程如图1-2所示：<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202204301922772.png"></figure></p>
+<p>​		虚拟机部分的操作基本完成后，从JAVA程序的角度看，对象创建还需&lt;“init”&gt;方法的执行，所有的字段赋值并初始化。流程如图1-2所示：</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202204301922772.png" style="zoom:67%;" /></figure>
+
 <h3 id="1-3-2对象的内存分布"><a href="#1-3-2对象的内存分布" class="headerlink" title="1.3.2对象的内存分布"></a>1.3.2对象的内存分布</h3><p>​		在HotSpot虚拟机中，对象在内存中存储的布局可以分为三块区域：对象头、实例数据和对齐填充。</p>
 <p>​		对象头包含两部分信息，一部分用于存储对象自身的运行时数据，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等等，这部分的长度在32位和64位虚拟机中分别为32bit和64bit，官方称它为“Mark Word”。对象需要存储的运行时数据很多，考虑到虚拟机的空间效率，Mark Word被设计成一个非固定的数据结构以便在极小的空间内存储尽量多的信息，它会根据对象的状态服用自己的存储空间。例如，在32位虚拟机中，如果对象处在未锁定状态下，那么Mark Word的32bit空间中的25bit用于存储对象哈希码。4bit用于存储对象分代年龄，2bit用于存储锁标志位，1bit固定为0。对象的另外一部分是类型指针，即对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例。当对象是一个JAVA数组，那么对象头中还必须有一块用于记录数组长度的数据，因为虚拟机可以通过普通JAVA对象的元数据信息确定JAVA对象的大小，但是从数组的元数据中却无法确定数组的大小。</p>
 <p>​		接下来是实例数据部分，这部分是对象真正存储的有效信息，也是程序代码中所定义的各种类型的字段内容。无论是从父类继承下来的，还是在子类中定义的，都需要记录起来。</p>
@@ -222,7 +226,8 @@
 
 <p>从运行结果中可以清楚看到，GC日志中包含“4603K-＞210K”，意味着虚拟机并没有因为这两个对象互相引用就不回收它们，这也从侧面说明虚拟机<strong>并不是通过引用计数算法来判断对象是否存活的</strong>。</p>
 <h3 id="2-2-2-可达性分析算法"><a href="#2-2-2-可达性分析算法" class="headerlink" title="2.2.2 可达性分析算法"></a>2.2.2 可达性分析算法</h3><p>​		在主流的商用程序语言（Java、C#，甚至包括前面提到的古老的Lisp）的主流实现中，都是称通过可达性分析（ReachabilityAnalysis）来判定对象是否存活的。这个算法的基本思路就是通过一系列的称为“GCRoots”的对象作为起始点，从这些节点开始向下搜索，搜索所走过的路径称为引用链（ReferenceChain），当一个对象到GCRoots没有<strong>任何引用链相连</strong>（用图论的话来说，就是从GCRoots到这个对象不可达）时，则证明此对象是不可用的。如图2-1所示，对象object5、object6、object7虽然互相有关联，但是它们到GCRoots是不可达的，所以它们将会被判定为是可回收的对象。</p>
-<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011130481.png"></figure></p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011130481.png" style="zoom:67%;" /></figure>
+
 <p>在Java语言中，可作为GC Roots的对象包括下面几种： </p>
 <ul>
 <li><strong>虚拟机栈（栈帧中的本地变量表）中引用的对象。</strong> </li>
@@ -258,14 +263,17 @@
 <p>​		虚拟机可以对满足上述3个条件的无用类进行回收，这里说的仅仅是“可以”，而并不是和对象一样，<strong>不使用了就必然会回收</strong>。是否对类进行回收，HotSpot虚拟机提供了**-Xnoclassgc参数进行控制**，还可以使用-verbose：class以及-XX：+TraceClassLoading、-XX：+TraceClassUnLoading查看类加载和卸载信息，其中-verbose：class和-XX：+TraceClassLoading可以在Product版的虚拟机中使用，-XX：+TraceClassUnLoading参数需要FastDebug版的虚拟机支持。</p>
 <p>​		在大量使用反射、动态代理、CGLib等ByteCode框架、动态生成JSP以及OSGi这类频繁自定义ClassLoader的场景都需要虚拟机具备类卸载的功能，以保证永久代不会溢出。</p>
 <h2 id="2-3-垃圾收集算法"><a href="#2-3-垃圾收集算法" class="headerlink" title="2.3 垃圾收集算法"></a>2.3 垃圾收集算法</h2><h3 id="3-3-1-标记-清除算法"><a href="#3-3-1-标记-清除算法" class="headerlink" title="3.3.1 标记-清除算法"></a>3.3.1 标记-清除算法</h3><p>​		最基础的收集算法是“标记-清除”（Mark-Sweep）算法，如同它的名字一样，算法分为“标记”和“清除”两个阶段：首先标记出所有需要回收的对象，在标记完成后统一回收所有被标记的对象，它的标记过程其实在前一节讲述对象标记判定时已经介绍过了。之所以说它是最基础的收集算法，是因为后续的收集算法都是基于这种思路并对其不足进行改进而得到的。它的主要不足有两个：一个是效率问题，标记和清除两个过程的效率都不高；另一个是空间问题，标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能会导致以后在程序运行过程中需要分配较大对象时，无法找到足够的连续内存而不得不提前触发另一次垃圾收集动作。标记—清除算法的执行过程如图2-2所示。</p>
-<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011300203.png"></figure></p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011300203.png" style="zoom:67%;" /></figure>
+
 <h3 id="2-3-2-复制算法"><a href="#2-3-2-复制算法" class="headerlink" title="2.3.2 复制算法"></a>2.3.2 复制算法</h3><p>​		为了解决效率问题，一种称为“复制”（Copying）的收集算法出现了，它将可用内存按容量划分为大小相等的两块，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用过的内存空间一次清理掉。这样使得每次都是对整个半区进行内存回收，内存分配时也就不用考虑内存碎片等复杂情况，只要移动堆顶指针，按顺序分配内存即可，实现简单，运行高效。只是这种算法的代价是将内存缩小为了原来的一半，未免太高了一点。复制算法的执行过程如图2-3所示。</p>
-<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011302658.png"></figure></p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011302658.png" style="zoom:67%;" /></figure>
+
 <p>​		现在的商业虚拟机都采用这种收集算法来回收新生代，IBM公司的专门研究表明，新生代中的对象<strong>98%是“朝生夕死”的</strong>，所以并不需要按照1:1的比例来划分内存空间，而是将内存分为一块<strong>较大的Eden空间和两块较小的Survivor空间</strong>，每次使用Eden和其中一块Survivor。当回收时，将Eden和Survivor中还存活着的对象一次性地复制到另外一块Survivor空间上，最后清理掉Eden和刚才用过的Survivor空间。<strong>HotSpot虚拟机默认Eden和Survivor的大小比例是8:1</strong>，也就是每次新生代中可用内存空间为整个新生代容量的90%（80%+10%），只有10%的内存会被“浪费”。当然，98%的对象可回收只是一般场景下的数据，我们没有办法保证每次回收都只有不多于10%的对象存活，当Survivor空间不够用时，需要依赖其他内存（这里指老年代）进行<strong>分配担保</strong>（HandlePromotion）。</p>
 <p>​		内存的分配担保就好比我们去银行借款，如果我们信誉很好，在98%的情况下都能按时偿还，于是银行可能会默认我们下一次也能按时按量地偿还贷款，只需要有一个担保人能保证如果我不能还款时，可以从他的账户扣钱，那银行就认为没有风险了。内存的分配担保也一样，如果<strong>另外一块Survivor空间没有足够空间存放上一次新生代收集下来的存活对象时，这些对象将直接通过分配担保机制进入老年代。</strong></p>
 <h3 id="2-3-3-标记-整理算法"><a href="#2-3-3-标记-整理算法" class="headerlink" title="2.3.3 标记-整理算法"></a>2.3.3 标记-整理算法</h3><p>​		复制收集算法在<strong>对象存活率较高时就要进行较多的复制操作，效率将会变低</strong>。更关键的是，如果不想浪费50%的空间，就需要有额外的空间进行分配担保，以应对被使用的内存中<strong>所有对象都100%存活的极端情况</strong>，所以在老年代一般不能直接选用这种算法。</p>
 <p>​		根据老年代的特点，有人提出了另外一种“标记-整理”（Mark-Compact）算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存，“标记-整理”算法的示意图如图2-4所示。</p>
-<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011307238.png"></figure></p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011307238.png" style="zoom:67%;" /></figure>
+
 <h3 id="2-3-4-分代收集算法"><a href="#2-3-4-分代收集算法" class="headerlink" title="2.3.4 分代收集算法"></a>2.3.4 分代收集算法</h3><p>​		当前商业虚拟机的垃圾收集都采用“分代收集”（GenerationalCollection）算法，这种算法并没有什么新的思想，只是根据对象存活周期的不同将内存划分为几块。一般是把Java堆分为新生代和老年代，这样就可以根据各个年代的特点采用最适当的收集算法。在新生代中，每次垃圾收集时都发现有大批对象死去，只有少量存活，那就选用复制算法，只需要付出少量存活对象的复制成本就可以完成收集。而老年代中因为对象存活率高、没有额外空间对它进行分配担保，就必须使用“标记—清理”或者“标记—整理”算法来进行回收。</p>
 <h2 id="2-4-HotSpot的算法实现"><a href="#2-4-HotSpot的算法实现" class="headerlink" title="2.4 HotSpot的算法实现"></a>2.4 HotSpot的算法实现</h2><h3 id="2-4-1-枚举根节点"><a href="#2-4-1-枚举根节点" class="headerlink" title="2.4.1 枚举根节点"></a>2.4.1 枚举根节点</h3><p>​		从可达性分析中从GCRoots节点找引用链这个操作为例，可作为GCRoots的节点主要在全局性的引用（例如常量或类静态属性）与执行上下文（例如栈帧中的本地变量表）中，现在很多应用仅仅方法区就有数百兆，如果要逐个检查这里面的引用，那么必然会消耗很多时间。</p>
 <p>​		另外，可达性分析对执行时间的敏感还体现在GC停顿上，因为这项分析工作必须在一个能确保<strong>一致性的快照</strong>中进行——这里“一致性”的意思是指在整个分析期间整个执行系统看起来就像被<strong>冻结在某个时间点</strong>上，<strong>不可以出现分析过程中对象引用关系还在不断变化的情况</strong>，该点不满足的话分析结果准确性就无法得到保证。这点是导致GC进行时必须停顿所有Java执行线程（Sun将这件事情称为“StopTheWorld”）的其中一个重要原因，即使是在号称（几乎）不会发生停顿的CMS收集器中，枚举根节点时也是必须要停顿的。</p>
@@ -277,12 +285,15 @@
 <h3 id="2-4-3-安全区域"><a href="#2-4-3-安全区域" class="headerlink" title="2.4.3 安全区域"></a>2.4.3 安全区域</h3><p>​		使用Safepoint似乎已经完美地解决了如何进入GC的问题，但实际情况却并不一定。Safepoint机制保证了程序执行时，在不太长的时间内就会遇到可进入GC的Safepoint。但是，程序“不执行”的时候呢？所谓的<strong>程序不执行就是没有分配CPU时间</strong>，典型的例子就是<strong>线程处于Sleep状态或者Blocked状态</strong>，这时候线程无法响应JVM的中断请求，“走”到安全的地方去中断挂起，JVM也显然不太可能等待线程重新被分配CPU时间。对于这种情况，就需要安全区域（SafeRegion）来解决。</p>
 <p>​		安全区域是指在一段代码片段之中，<strong>引用关系不会发生变化</strong>。在这个区域中的任意地方开始GC都是安全的。我们也可以把SafeRegion看做是被扩展了的Safepoint。在线程执行到SafeRegion中的代码时，首先标识自己已经进入了SafeRegion，那样，当在这段时间里JVM要发起GC时，<strong>就不用管标识自己为SafeRegion状态的线程了</strong>。<strong>在线程要离开SafeRegion时，它要检查系统是否已经完成了根节点枚举（或者是整个GC过程）</strong>，如果完成了，那线程就继续执行，否则它就必须等待直到收到可以安全离开SafeRegion的信号为止。		到此，笔者简要地介绍了HotSpot虚拟机如何去发起内存回收的问题，但是虚拟机如何具体地进行内存回收动作仍然未涉及，因为内存回收如何进行是由虚拟机所采用的GC收集器决定的，而通常虚拟机中往往不止有一种GC收集器。下面继续来看HotSpot中有哪些GC收集器。</p>
 <h2 id="2-5-垃圾收集器"><a href="#2-5-垃圾收集器" class="headerlink" title="2.5 垃圾收集器"></a>2.5 垃圾收集器</h2><p>​		如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。Java虚拟机规范中对垃圾收集器应该如何实现并没有任何规定，因此不同的厂商、不同版本的虚拟机所提供的垃圾收集器都可能会有很大差别，并且一般都会提供参数供用户根据自己的应用特点和要求组合出各个年代所使用的收集器。这里讨论的收集器基于JDK1.7Update14之后的HotSpot虚拟机（在这个版本中正式提供了商用的G1收集器，之前G1仍处于实验状态），这个虚拟机包含的所有收集器如图2-5所示。</p>
-<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011402440.png"></figure></p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011402440.png" style="zoom:67%;" /></figure>
+
 <p>​		图2-5展示了7种作用于不同分代的收集器，如果两个收集器之间存在连线，就说明它们可以搭配使用。虚拟机所处的区域，则表示它是属于新生代收集器还是老年代收集器。接下来笔者将逐一介绍这些收集器的特性、基本原理和使用场景，并重点分析CMS和G1这两款相对复杂的收集器，了解它们的部分运作细节。在介绍这些收集器各自的特性之前，我们先来明确一个观点：虽然我们是在对各个收集器进行比较，但并非为了挑选出一个最好的收集器。因为直到现在为止还没有最好的收集器出现，更加没有万能的收集器，所以我们选择的只是对具体应用最合适的收集器。这点不需要多加解释就能证明：如果有一种放之四海皆准、任何场景下都适用的完美收集器存在，那HotSpot虚拟机就没必要实现那么多不同的收集器了。</p>
 <h3 id="2-5-1-Serial收集器"><a href="#2-5-1-Serial收集器" class="headerlink" title="2.5.1 Serial收集器"></a>2.5.1 Serial收集器</h3><p>​		Serial收集器是最基本、发展历史最悠久的收集器，曾经（在JDK1.3.1之前）是虚拟机新生代收集的唯一选择。大家看名字就会知道，这个收集器是一个<strong>单线程的收集器</strong>，但它的“单线程”的意义并不仅仅说明它只会使用一个CPU或一条收集线程去完成垃圾收集工作，更重要的是在它进行垃圾收集时，必须暂停其他所有的工作线程，直到它收集结束。“StopTheWorld”这个名字也许听起来很酷，但这项工作实际上是由虚拟机在后台自动发起和自动完成的，在用户不可见的情况下把用户正常工作的线程全部停掉，这对很多应用来说都是难以接受的。读者不妨试想一下，要是你的计算机每运行一个小时就会暂停响应5分钟，你会有什么样的心情？图2-6示意了Serial&#x2F;SerialOld收集器的运行过程。</p>
-<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011403493.png"></figure></p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011403493.png" style="zoom:67%;" /></figure>
+
 <h3 id="2-5-2-ParNew收集器"><a href="#2-5-2-ParNew收集器" class="headerlink" title="2.5.2 ParNew收集器"></a>2.5.2 ParNew收集器</h3><p>​		ParNew收集器其实就是Serial收集器的<strong>多线程版本</strong>，除了使用多条线程进行垃圾收集之外，其余行为包括Serial收集器可用的所有控制参数（例如：-XX：SurvivorRatio、-XX：PretenureSizeThreshold、-XX：HandlePromotionFailure等）、收集算法、Stop The World、对象分配规则、回收策略等都与Serial收集器完全一样，在实现上，这两种收集器也共用了相当多的代码。ParNew收集器的工作过程如图2-7所示。</p>
-<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011403381.png"></figure></p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011403381.png" style="zoom:67%;" /></figure>
+
 <p>​		ParNew收集器除了多线程收集之外，其他与Serial收集器相比并没有太多创新之处，但它却是许多运行在Server模式下的虚拟机中首选的新生代收集器，其中有一个与性能无关但很重要的原因是，除了Serial收集器外，<strong>目前只有它能与CMS收集器配合工作</strong>。在JDK1.5时期，HotSpot推出了一款在强交互应用中几乎可认为有划时代意义的垃圾收集器——CMS收集器（ConcurrentMarkSweep，本节稍后将详细介绍这款收集器），这款收集器是HotSpot虚拟机中第一款真正意义上的并发（Concurrent）收集器，它第一次实现了让垃圾收集线程与用户线程（基本上）同时工作，用前面那个例子的话来说，<strong>就是做到了在你的妈妈打扫房间的时候你还能一边往地上扔纸屑</strong>。</p>
 <p>​		不幸的是，CMS作为老年代的收集器，却无法与JDK1.4.0中已经存在的新生代收集器ParallelScavenge配合工作，<strong>所以在JDK1.5中使用CMS来收集老年代的时候，新生代只能选择ParNew或者Serial收集器中的一个</strong>。ParNew收集器也是使用-XX：+UseConcMarkSweepGC选项后的默认新生代收集器，也可以使用-XX：+UseParNewGC选项来强制指定它。</p>
 <p>​		ParNew收集器在单CPU的环境中绝对不会有比Serial收集器更好的效果，甚至由于存在线程交互的开销，该收集器在通过超线程技术实现的两个CPU的环境中都不能百分之百地保证可以超越Serial收集器。当然，随着可以使用的CPU的数量的增加，它对于GC时系统资源的有效利用还是很有好处的。它默认开启的收集线程数与CPU的数量相同，在CPU非常多（譬如32个，现在CPU动辄就4核加超线程，服务器超过32个逻辑CPU的情况越来越多了）的环境下，可以使用-XX：ParallelGCThreads参数来限制垃圾收集的线程数。</p>
@@ -295,11 +306,17 @@
 <p>​		由于与吞吐量关系密切，ParallelScavenge收集器也经常称为“<strong>吞吐量优先”收集器</strong>。除上述两个参数之外，ParallelScavenge收集器还有一个参数-XX：+UseAdaptiveSizePolicy值得关注。这是一个开关参数，当这个参数打开之后，就不需要手工指定新生代的大小（-Xmn）、Eden与Survivor区的比例（-XX：SurvivorRatio）、晋升老年代对象年龄（-XX：PretenureSizeThreshold）等细节参数了，虚拟机会根据当前系统的运行情况收集性能监控信息，动态调整这些参数以提供最合适的停顿时间或者最大的吞吐量，这种调节方式称为<strong>GC自适应的调节策略（GCErgonomics）</strong>。如果读者对于收集器运作原来不太了解，手工优化存在困难的时候，使用ParallelScavenge收集器配合自适应调节策略，把内存管理的调优任务交给虚拟机去完成将是一个不错的选择。只需要把基本的内存数据设置好（如-Xmx设置最大堆），然后使用MaxGCPauseMillis参数（更关注最大停顿时间）或GCTimeRatio（更关注吞吐量）参数给虚拟机设立一个优化目标，那具体细节参数的调节工作就由虚拟机完成了。自适应调节策略也是ParallelScavenge收集器与ParNew收集器的一个重要区别。</p>
 <h3 id="2-5-4-Serial-Old收集器"><a href="#2-5-4-Serial-Old收集器" class="headerlink" title="2.5.4 Serial Old收集器"></a>2.5.4 Serial Old收集器</h3><p>​		SerialOld是Serial收集器的老年代版本，它同样是一个单线程收集器，使用“<strong>标记-整理</strong>”算法。这个收集器的主要意义也是在于给Client模式下的虚拟机使用。如果在Server模式下，那么它主要还有两大用途：</p>
 <ul>
-<li>一种用途是在JDK1.5以及之前的版本中与Parallel-Scavenge收集器搭配使用。</li>
-<li>另一种用途就是作为CMS收集器的后备预案，在并发收集发生ConcurrentModeFailure时使用。</li>
+<li>一种用途是在JDK1.5以及之前的版本中与<strong>Parallel-Scavenge收集器搭配使用</strong>。</li>
+<li>另一种用途就是作为<strong>CMS收集器的后备预案</strong>，在并发收集发生ConcurrentModeFailure时使用。</li>
 </ul>
 <p>这两点都将在后面的内容中详细讲解。SerialOld收集器的工作过程如图2-8所示。</p>
-<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011403359.png"></figure></p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011403359.png" style="zoom:67%;" /></figure>
+
+<h3 id="2-5-5-Parallel-Old收集器"><a href="#2-5-5-Parallel-Old收集器" class="headerlink" title="2.5.5 Parallel Old收集器"></a>2.5.5 Parallel Old收集器</h3><p>​		ParallelOld是<strong>Parallel Scavenge收集器的老年代版本</strong>，使用<strong>多线程和“标记-整理”算法</strong>。这个收集器是在JDK1.6中才开始提供的，在此之前，新生代的ParallelScavenge收集器一直处于比较尴尬的状态。原因是，如果新生代选择了ParallelScavenge收集器，老年代除了SerialOld（PSMarkSweep）收集器外别无选择（还记得上面说过<strong>ParallelScavenge收集器无法与CMS收集器配合</strong>工作吗？）。由于老年代SerialOld收集器在服务端应用性能上的“拖累”，使用了ParallelScavenge收集器也未必能在整体应用上获得吞吐量最大化的效果，由于单线程的老年代收集中无法充分利用服务器多CPU的处理能力，在老年代很大而且硬件比较高级的环境中，这种组合的吞吐量甚至还不一定有ParNew加CMS的组合“给力”。</p>
+<p>​		直到ParallelOld收集器出现后，“吞吐量优先”收集器终于有了比较名副其实的应用组合，在注重吞吐量以及CPU资源敏感的场合，都可以优先考虑ParallelScavenge加ParallelOld收集器。ParallelOld收集器的工作过程如图2-9所示。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011406506.png" style="zoom:67%;" /></figure>
+
+<p>图 3-9 Parallel Scavenge&#x2F;Parallel Old收集器运行示意图</p>
 
 	
 
