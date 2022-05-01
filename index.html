@@ -304,12 +304,12 @@
 <h3 id="2-4-3-安全区域"><a href="#2-4-3-安全区域" class="headerlink" title="2.4.3 安全区域"></a>2.4.3 安全区域</h3><p>​		使用Safepoint似乎已经完美地解决了如何进入GC的问题，但实际情况却并不一定。Safepoint机制保证了程序执行时，在不太长的时间内就会遇到可进入GC的Safepoint。但是，程序“不执行”的时候呢？所谓的<strong>程序不执行就是没有分配CPU时间</strong>，典型的例子就是<strong>线程处于Sleep状态或者Blocked状态</strong>，这时候线程无法响应JVM的中断请求，“走”到安全的地方去中断挂起，JVM也显然不太可能等待线程重新被分配CPU时间。对于这种情况，就需要安全区域（SafeRegion）来解决。</p>
 <p>​		安全区域是指在一段代码片段之中，<strong>引用关系不会发生变化</strong>。在这个区域中的任意地方开始GC都是安全的。我们也可以把SafeRegion看做是被扩展了的Safepoint。在线程执行到SafeRegion中的代码时，首先标识自己已经进入了SafeRegion，那样，当在这段时间里JVM要发起GC时，<strong>就不用管标识自己为SafeRegion状态的线程了</strong>。<strong>在线程要离开SafeRegion时，它要检查系统是否已经完成了根节点枚举（或者是整个GC过程）</strong>，如果完成了，那线程就继续执行，否则它就必须等待直到收到可以安全离开SafeRegion的信号为止。		到此，笔者简要地介绍了HotSpot虚拟机如何去发起内存回收的问题，但是虚拟机如何具体地进行内存回收动作仍然未涉及，因为内存回收如何进行是由虚拟机所采用的GC收集器决定的，而通常虚拟机中往往不止有一种GC收集器。下面继续来看HotSpot中有哪些GC收集器。</p>
 <h2 id="2-5-垃圾收集器"><a href="#2-5-垃圾收集器" class="headerlink" title="2.5 垃圾收集器"></a>2.5 垃圾收集器</h2><p>​		如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。Java虚拟机规范中对垃圾收集器应该如何实现并没有任何规定，因此不同的厂商、不同版本的虚拟机所提供的垃圾收集器都可能会有很大差别，并且一般都会提供参数供用户根据自己的应用特点和要求组合出各个年代所使用的收集器。这里讨论的收集器基于JDK1.7Update14之后的HotSpot虚拟机（在这个版本中正式提供了商用的G1收集器，之前G1仍处于实验状态），这个虚拟机包含的所有收集器如图2-5所示。</p>
-<p><figure class="figure"><img src="/../../public/img/jvm3-1.png"></figure></p>
+<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011402440.png"></figure></p>
 <p>​		图2-5展示了7种作用于不同分代的收集器，如果两个收集器之间存在连线，就说明它们可以搭配使用。虚拟机所处的区域，则表示它是属于新生代收集器还是老年代收集器。接下来笔者将逐一介绍这些收集器的特性、基本原理和使用场景，并重点分析CMS和G1这两款相对复杂的收集器，了解它们的部分运作细节。在介绍这些收集器各自的特性之前，我们先来明确一个观点：虽然我们是在对各个收集器进行比较，但并非为了挑选出一个最好的收集器。因为直到现在为止还没有最好的收集器出现，更加没有万能的收集器，所以我们选择的只是对具体应用最合适的收集器。这点不需要多加解释就能证明：如果有一种放之四海皆准、任何场景下都适用的完美收集器存在，那HotSpot虚拟机就没必要实现那么多不同的收集器了。</p>
 <h3 id="2-5-1-Serial收集器"><a href="#2-5-1-Serial收集器" class="headerlink" title="2.5.1 Serial收集器"></a>2.5.1 Serial收集器</h3><p>​		Serial收集器是最基本、发展历史最悠久的收集器，曾经（在JDK1.3.1之前）是虚拟机新生代收集的唯一选择。大家看名字就会知道，这个收集器是一个<strong>单线程的收集器</strong>，但它的“单线程”的意义并不仅仅说明它只会使用一个CPU或一条收集线程去完成垃圾收集工作，更重要的是在它进行垃圾收集时，必须暂停其他所有的工作线程，直到它收集结束。“StopTheWorld”这个名字也许听起来很酷，但这项工作实际上是由虚拟机在后台自动发起和自动完成的，在用户不可见的情况下把用户正常工作的线程全部停掉，这对很多应用来说都是难以接受的。读者不妨试想一下，要是你的计算机每运行一个小时就会暂停响应5分钟，你会有什么样的心情？图2-6示意了Serial&#x2F;SerialOld收集器的运行过程。</p>
-<p><figure class="figure"><img src="/../../public/img/jvm3-2.png"></figure></p>
+<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011403493.png"></figure></p>
 <h3 id="2-5-2-ParNew收集器"><a href="#2-5-2-ParNew收集器" class="headerlink" title="2.5.2 ParNew收集器"></a>2.5.2 ParNew收集器</h3><p>​		ParNew收集器其实就是Serial收集器的<strong>多线程版本</strong>，除了使用多条线程进行垃圾收集之外，其余行为包括Serial收集器可用的所有控制参数（例如：-XX：SurvivorRatio、-XX：PretenureSizeThreshold、-XX：HandlePromotionFailure等）、收集算法、Stop The World、对象分配规则、回收策略等都与Serial收集器完全一样，在实现上，这两种收集器也共用了相当多的代码。ParNew收集器的工作过程如图2-7所示。</p>
-<p><figure class="figure"><img src="/../../public/img/jvm3-3.png"></figure></p>
+<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011403381.png"></figure></p>
 <p>​		ParNew收集器除了多线程收集之外，其他与Serial收集器相比并没有太多创新之处，但它却是许多运行在Server模式下的虚拟机中首选的新生代收集器，其中有一个与性能无关但很重要的原因是，除了Serial收集器外，<strong>目前只有它能与CMS收集器配合工作</strong>。在JDK1.5时期，HotSpot推出了一款在强交互应用中几乎可认为有划时代意义的垃圾收集器——CMS收集器（ConcurrentMarkSweep，本节稍后将详细介绍这款收集器），这款收集器是HotSpot虚拟机中第一款真正意义上的并发（Concurrent）收集器，它第一次实现了让垃圾收集线程与用户线程（基本上）同时工作，用前面那个例子的话来说，<strong>就是做到了在你的妈妈打扫房间的时候你还能一边往地上扔纸屑</strong>。</p>
 <p>​		不幸的是，CMS作为老年代的收集器，却无法与JDK1.4.0中已经存在的新生代收集器ParallelScavenge配合工作，<strong>所以在JDK1.5中使用CMS来收集老年代的时候，新生代只能选择ParNew或者Serial收集器中的一个</strong>。ParNew收集器也是使用-XX：+UseConcMarkSweepGC选项后的默认新生代收集器，也可以使用-XX：+UseParNewGC选项来强制指定它。</p>
 <p>​		ParNew收集器在单CPU的环境中绝对不会有比Serial收集器更好的效果，甚至由于存在线程交互的开销，该收集器在通过超线程技术实现的两个CPU的环境中都不能百分之百地保证可以超越Serial收集器。当然，随着可以使用的CPU的数量的增加，它对于GC时系统资源的有效利用还是很有好处的。它默认开启的收集线程数与CPU的数量相同，在CPU非常多（譬如32个，现在CPU动辄就4核加超线程，服务器超过32个逻辑CPU的情况越来越多了）的环境下，可以使用-XX：ParallelGCThreads参数来限制垃圾收集的线程数。</p>
@@ -320,7 +320,13 @@
 <p>​		MaxGCPauseMillis参数允许的值是一个大于0的毫秒数，收集器将尽可能地保证内存回收花费的时间不超过设定值。不过大家不要认为如果把这个参数的值设置得稍小一点就能使得系统的垃圾收集速度变得更快，<strong>GC停顿时间缩短是以牺牲吞吐量和新生代空间来换取的</strong>：系统把新生代调小一些，收集300MB新生代肯定比收集500MB快吧，这也直接导致<strong>垃圾收集发生得更频繁</strong>一些，原来10秒收集一次、每次停顿100毫秒，现在变成5秒收集一次、每次停顿70毫秒。<strong>停顿时间的确在下降，但吞吐量也降下来了</strong>。</p>
 <p>​		GCTimeRatio参数的值应当是一个大于0且小于100的整数，也就是垃圾收集时间占总时间的比率，相当于是吞吐量的倒数。如果把此参数设置为19，那允许的最大GC时间就占总时间的5%（即1&#x2F;（1+19）），默认值为99，就是允许最大1%（即1&#x2F;（1+99））的垃圾收集时间。</p>
 <p>​		由于与吞吐量关系密切，ParallelScavenge收集器也经常称为“<strong>吞吐量优先”收集器</strong>。除上述两个参数之外，ParallelScavenge收集器还有一个参数-XX：+UseAdaptiveSizePolicy值得关注。这是一个开关参数，当这个参数打开之后，就不需要手工指定新生代的大小（-Xmn）、Eden与Survivor区的比例（-XX：SurvivorRatio）、晋升老年代对象年龄（-XX：PretenureSizeThreshold）等细节参数了，虚拟机会根据当前系统的运行情况收集性能监控信息，动态调整这些参数以提供最合适的停顿时间或者最大的吞吐量，这种调节方式称为<strong>GC自适应的调节策略（GCErgonomics）</strong>。如果读者对于收集器运作原来不太了解，手工优化存在困难的时候，使用ParallelScavenge收集器配合自适应调节策略，把内存管理的调优任务交给虚拟机去完成将是一个不错的选择。只需要把基本的内存数据设置好（如-Xmx设置最大堆），然后使用MaxGCPauseMillis参数（更关注最大停顿时间）或GCTimeRatio（更关注吞吐量）参数给虚拟机设立一个优化目标，那具体细节参数的调节工作就由虚拟机完成了。自适应调节策略也是ParallelScavenge收集器与ParNew收集器的一个重要区别。</p>
-<h3 id="2-5-4-Serial-Old收集器"><a href="#2-5-4-Serial-Old收集器" class="headerlink" title="2.5.4 Serial Old收集器"></a>2.5.4 Serial Old收集器</h3><p>​		SerialOld是Serial收集器的老年代版本，它同样是一个单线程收集器，使用“标记-整理”算法。这个收集器的主要意义也是在于给Client模式下的虚拟机使用。如果在Server模式下，那么它主要还有两大用途：一种用途是在JDK1.5以及之前的版本中与Parallel-Scavenge收集器搭配使用，另一种用途就是作为CMS收集器的后备预案，在并发收集发生ConcurrentModeFailure时使用。这两点都将在后面的内容中详细讲解。SerialOld收集器的工作过程如图2-8所示。</p>
+<h3 id="2-5-4-Serial-Old收集器"><a href="#2-5-4-Serial-Old收集器" class="headerlink" title="2.5.4 Serial Old收集器"></a>2.5.4 Serial Old收集器</h3><p>​		SerialOld是Serial收集器的老年代版本，它同样是一个单线程收集器，使用“<strong>标记-整理</strong>”算法。这个收集器的主要意义也是在于给Client模式下的虚拟机使用。如果在Server模式下，那么它主要还有两大用途：</p>
+<ul>
+<li>一种用途是在JDK1.5以及之前的版本中与Parallel-Scavenge收集器搭配使用。</li>
+<li>另一种用途就是作为CMS收集器的后备预案，在并发收集发生ConcurrentModeFailure时使用。</li>
+</ul>
+<p>这两点都将在后面的内容中详细讲解。SerialOld收集器的工作过程如图2-8所示。</p>
+<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205011403359.png"></figure></p>
 
 	
 
