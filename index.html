@@ -605,7 +605,30 @@
 
 <figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021646168.png" style="zoom: 67%;" /></figure>
 
-<p>​		</p>
+<h3 id="3-3-2-VisualVM：多合一故障处理工具"><a href="#3-3-2-VisualVM：多合一故障处理工具" class="headerlink" title="3.3.2 VisualVM：多合一故障处理工具"></a>3.3.2 VisualVM：多合一故障处理工具</h3><p>​		VisualVM（All-in-OneJavaTroubleshootingTool）是到目前为止随JDK发布的功能最强大的运行监视和故障处理程序，并且可以预见在未来一段时间内都是官方主力发展的虚拟机故障处理工具。官方在VisualVM的软件说明中写上了“All-in-One”的描述字样，预示着它除了运行监视、故障处理外，还提供了很多其他方面的功能。如性能分析（Profiling），VisualVM的性能分析功能甚至比起JProfiler、YourKit等专业且收费的Profiling工具都不会逊色多少，而且VisualVM的还有一个很大的优点：不需要被监视的程序基于特殊Agent运行，因此它对应用程序的实际性能的影响很小，使得它可以直接应用在生产环境中。这个优点是JProfiler、YourKit等工具无法与之媲美的。</p>
+<p>​		VisualVM基于NetBeans平台开发，因此它一开始就具备了插件扩展功能的特性，通过插件扩展支持，VisualVM可以做到：</p>
+<ul>
+<li>显示虚拟机进程以及进程的配置、环境信息（jps、jinfo）。</li>
+<li>监视应用程序的CPU、GC、堆、方法区以及线程的信息（jstat、jstack）。</li>
+<li>dump以及分析堆转储快照（jmap、jhat）。</li>
+<li>方法级的程序运行性能分析，找出被调用最多、运行时间最长的方法。</li>
+<li>离线程序快照：收集程序的运行时配置、线程dump、内存dump等信息建立一个快照，可以将快照发送开发者处进行Bug反馈。</li>
+</ul>
+<p>​		其他plugins的无限的可能性……</p>
+<p>​		VisualVM在JDK1.6update7中才首次出现，但并不意味着它只能监控运行于JDK1.6上的程序，它具备很强的向下兼容能力，甚至能向下兼容至近10年前发布的JDK1.4.2平台，这对无数已经处于实施、维护的项目很有意义。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021700415.png" style="zoom:67%;" /></figure>
+
+<p>​		VisualVM中“概述”、“监视”、“线程”、“MBeans”的功能与前面介绍的JConsole差别不大，读者根据上文内容类比使用即可，下面挑选几个特色功能、插件进行介绍。</p>
+<p>​		生成、浏览堆转储快照</p>
+<p>​		在VisualVM中生成dump文件有两种方式，可以执行下列任一操作：</p>
+<p>​		在“应用程序”窗口中右键单击应用程序节点，然后选择“堆Dump”。</p>
+<p>​		在“应用程序”窗口中双击应用程序节点以打开应用程序标签，然后在“监视”标签中单击“堆Dump”。</p>
+<p>​		生成了dump文件之后，应用程序页签将在该堆的应用程序下增加一个以[heapdump]开头的子节点，并且在主页签中打开了该转储快照，如图所示。如果需要把dump文件保存或发送出去，要在heapdump节点上右键选择“另存为”菜单，否则当VisualVM关闭时，生成的dump文件会被当做临时文件删除掉。要打开一个已经存在的dump文件，通过文件菜单中的“装入”功能，选择硬盘上的dump文件即可。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021707240.png" style="zoom:67%;" /></figure>
+
+<p>​		从堆页签中的“摘要”面板可以看到应用程序dump时的运行时参数、System.getProperties（）的内容、线程堆栈等信息，“类”面板则是以类为统计口径统计类的实例数量、容量信息，“实例”面板不能直接使用，因为不能确定用户想查看哪个类的实例，所以需要通过“类”-面板进入，在“类”中选择一个关心的类后双击鼠标，即可在“实例”里面看见此类中500个实例的具体属性信息。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021713771.png" style="zoom:67%;" /></figure>
+
 
 	
 
