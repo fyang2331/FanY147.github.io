@@ -547,15 +547,14 @@
 <h3 id="3-3-1-JConsole：Java监视与管理控制台"><a href="#3-3-1-JConsole：Java监视与管理控制台" class="headerlink" title="3.3.1 JConsole：Java监视与管理控制台"></a>3.3.1 JConsole：Java监视与管理控制台</h3><p>​		JConsole（JavaMonitoringandManagementConsole）是一种基于JMX的可视化监视、管理工具。它管理部分的功能是针对JMXMBean进行管理，由于MBean可以使用代码、中间件服务器的管理控制台或者所有符合JMX规范的软件进行访问，所以本节将会着重介绍JConsole监视部分的功能。</p>
 <p>启动JConsole</p>
 <p>通过JDK&#x2F;bin目录下的“”启动JConsole后，将自动搜索出本机运行的所有虚拟机进程，不需要用户自己再使用jps来查询了，Idea中在Jshell中输入命令启动Jconsole，如图所示。双击选择其中一个进程即可开始监控，也可以使用下面的“远程进程”功能来连接远程服务器，对远程虚拟机进行监控。</p>
-<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021050948.png" style="zoom: 50%;" /></figure>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021050948.png" style="zoom: 67%;" /></figure>
 
 <p>双击它进入JConsole主 界面，可以看到主界面里共包括“概述”、“内存”、“线程”、“类”、“VM摘要”、“MBean”6个 页签，如图所示。</p>
-<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021054904.png" style="zoom: 50%;" /></figure>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021054904.png" style="zoom: 67%;" /></figure>
 
 <p>“概览”页签显示的是整个虚拟机主要运行数据的概览，其中包括“堆内存使用情况”、 “线程”、“类”、“CPU使用情况”4种信息的曲线图，这些曲线图是后面“内存”、“线程”、 “类”页签的信息汇总，具体内容将在后面介绍。</p>
-<p>内存监控</p>
-<p>“内存”页签相当于可视化的jstat命令，用于监视受收集器管理的虚拟机内存（Java堆和永久代）的变化趋势。我们通过运行代码清单4-8中的代码来体验一下它的监视功能。运行时设置的虚拟机参数为：-Xms100m-Xmx100m-XX：+UseSerialGC，这段代码的作用是以64KB&#x2F;50毫秒的速度往Java堆中填充数据，一共填充1000次，使用JConsole的“内存”页签进行监视，观察曲线和柱状指示图的变化。</p>
-<figure class="figure"><img src="../../public/img/jvm4-7.png" style="zoom:50%;" /></figure>
+<h4 id="3-3-1-1内存监控"><a href="#3-3-1-1内存监控" class="headerlink" title="3.3.1.1内存监控"></a>3.3.1.1<strong>内存监控</strong></h4><p>“内存”页签相当于可视化的jstat命令，用于监视受收集器管理的虚拟机内存（Java堆和永久代）的变化趋势。我们通过运行代码清单4-8中的代码来体验一下它的监视功能。运行时设置的虚拟机参数为：-Xms100m-Xmx100m-XX：+UseSerialGC，这段代码的作用是以64KB&#x2F;50毫秒的速度往Java堆中填充数据，一共填充1000次，使用JConsole的“内存”页签进行监视，观察曲线和柱状指示图的变化。</p>
+<figure class="figure"><img src="../../public/img/jvm4-7.png" style="zoom: 67%;" /></figure>
 
 <p>JConsole监视代码</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">test</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *内存占位符对象，一个OOMObject大约占64KB</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">OOMObject</span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">byte</span>[]placeholder=<span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">64</span>*<span class="number">1024</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">fillHeap</span><span class="params">(<span class="type">int</span> num)</span><span class="keyword">throws</span> InterruptedException&#123;</span><br><span class="line">        List&lt;OOMObject&gt;list=<span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;OOMObject&gt;();</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;num;i++)&#123;</span><br><span class="line"><span class="comment">//稍作延时，令监视曲线的变化更加明显</span></span><br><span class="line">            Thread.sleep(<span class="number">50</span>);</span><br><span class="line">            list.add(<span class="keyword">new</span> <span class="title class_">OOMObject</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        System.gc();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[]args)</span><span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        fillHeap(<span class="number">10000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -564,12 +563,49 @@
 <ul>
 <li>Eden区</li>
 </ul>
-<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021236149.png" style="zoom:50%;" /></figure>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021236149.png" style="zoom: 67%;" /></figure>
 
 <ul>
 <li>整个堆区：</li>
 </ul>
-<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021237074.png" style="zoom:50%;" /></figure>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021237074.png" style="zoom: 67%;" /></figure>
+
+<ol>
+<li>虚拟机启动参数只限制了Java堆为100MB，没有指定-Xmn参数，能否从监控图中估计出新生代有多大？<ul>
+<li>问题1答案：图4-6显示Eden空间为637720KB，因为没有设置-XX：SurvivorRadio参数， 所以Eden与Survivor空间比例为默认值8:1，整个新生代空间大约为637720KB×125%&#x3D;797150KB。</li>
+</ul>
+</li>
+<li>为何执行了System.gc（）之后，图中代表老年代的柱状图仍然显示峰值状态，代码需要如何调整才能让System.gc（）回收掉填充到堆中的对象？<ul>
+<li>问题2答案：执行完System.gc（）之后，空间未能回收是因为List＜OOMObject＞list对象 仍然存活，fillHeap（）方法仍然没有退出，因此list对象在System.gc（）执行时仍然处于作 用域之内[2]。如果把System.gc（）移动到fillHeap（）方法外调用就可以回收掉全部内存。</li>
+</ul>
+</li>
+</ol>
+<h4 id="3-3-1-2-线程监控"><a href="#3-3-1-2-线程监控" class="headerlink" title="3.3.1.2 线程监控"></a>3.3.1.2 线程监控</h4><p>​		如果上面的“内存”页签相当于可视化的jstat命令的话，“线程”页签的功能相当于可视化的jstack命令，遇到线程停顿时可以使用这个页签进行监控分析。前面讲解jstack命令的时候提到过线程长时间停顿的主要原因主要有：等待外部资源（数据库连接、网络资源、设备资源等）、死循环、锁等待（活锁和死锁）。通过代码分别演示一下这几种情况。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">*线程死循环演示</span><br><span class="line">*/</span><br><span class="line">public static void createBusyThread（）&#123;</span><br><span class="line">Thread thread=new Thread（new Runnable（）&#123;</span><br><span class="line">@Override</span><br><span class="line">public void run（）&#123;</span><br><span class="line">while（true）//第41行</span><br><span class="line">；</span><br><span class="line">&#125;</span><br><span class="line">&#125;，&quot;testBusyThread&quot;）；</span><br><span class="line">thread.start（）；</span><br><span class="line">&#125;</span><br><span class="line">/**</span><br><span class="line">*线程锁等待演示</span><br><span class="line">*/</span><br><span class="line">public static void createLockThread（final Object lock）&#123;</span><br><span class="line">Thread thread=new Thread（new Runnable（）&#123;</span><br><span class="line">@Override</span><br><span class="line">public void run（）&#123;</span><br><span class="line">synchronized（lock）&#123;</span><br><span class="line">try&#123;</span><br><span class="line">lock.wait（）；</span><br><span class="line">&#125;catch（InterruptedException e）&#123;</span><br><span class="line">e.printStackTrace（）；</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;，&quot;testLockThread&quot;）；</span><br><span class="line">thread.start（）；</span><br><span class="line">&#125;</span><br><span class="line">public static void main（String[]args）throws Exception&#123;</span><br><span class="line">BufferedReader br=new BufferedReader（new InputStreamReader（System.in））；</span><br><span class="line">br.readLine（）；</span><br><span class="line">createBusyThread（）；</span><br><span class="line">br.readLine（）；</span><br><span class="line">Object obj=new Object（）；</span><br><span class="line">createLockThread（obj）；</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序运行后，首先在“线程”页签中选择main线程，如图所示。堆栈追踪显示BufferedReader在readBytes方法中等待System.in的键盘输入，这时线程为Runnable状态，Runnable状态的线程会被分配运行时间，但readBytes方法检查到流没有更新时会立刻归还执行令牌，这种等待只消耗很小的CPU资源。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021631509.png" style="zoom: 67%;" /></figure>
+
+<p>​		接着监控testBusyThread线程，如图所示，testBusyThread线程一直在执行空循环，从堆栈追踪中看到一直在MonitoringTest.java代码的15行停留，15行为：while（true）。这时候线程为Runnable状态，而且没有归还线程执行令牌的动作，会在空循环上用尽全部执行时间直到线程切换，这种等待会消耗较多的CPU资源。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021632722.png" style="zoom: 67%;" /></figure>
+
+<p>​		图显示testLockThread线程在等待着lock对象的notify或notifyAll方法的出现，线程这时候处于WAITING状态，在被唤醒前不会被分配执行时间。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021634495.png" style="zoom: 67%;" /></figure>
+
+<p>​		testLockThread线程正在处于正常的活锁等待，只要lock对象的notify（）或notifyAll（）方法被调用，这个线程便能激活以继续执行。下列代码演示了一个无法再被激活的死锁等待。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">*线程死锁等待演示</span><br><span class="line">*/</span><br><span class="line">static class SynAddRunalbe implements Runnable&#123;</span><br><span class="line">int a,b；</span><br><span class="line">public SynAddRunalbe（int a,int b）&#123;</span><br><span class="line">this.a=a；</span><br><span class="line">this.b=b；</span><br><span class="line">&#125;</span><br><span class="line">@Override</span><br><span class="line">public void run（）&#123;</span><br><span class="line">synchronized（Integer.valueOf（a））&#123;</span><br><span class="line">synchronized（Integer.valueOf（b））&#123;</span><br><span class="line">System.out.println（a+b）；</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">public static void main（String[]args）&#123;</span><br><span class="line">for（int i=0；i＜100；i++）&#123;</span><br><span class="line">new Thread（new SynAddRunalbe（1，2））.start（）；</span><br><span class="line">new Thread（new SynAddRunalbe（2，1））.start（）；</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​		这段代码开了200个线程去分别计算1+2以及2+1的值，其实for循环是可省略的，两个线程也可能会导致死锁，不过那样概率太小，需要尝试运行很多次才能看到效果。一般的话，带for循环的版本最多运行2～3次就会遇到线程死锁，程序无法结束。造成死锁的原因是Integer.valueOf（）方法基于减少对象创建次数和节省内存的考虑，[-128，127]之间的数字会被缓存[3]，当valueOf（）方法传入参数在这个范围之内，将直接返回缓存中的对象。也就是说，代码中调用了200次Integer.valueOf（）方法一共就只返回了两个不同的对象。假如在某个线程的两个synchronized块之间发生了一次线程切换，那就会出现线程A等着被线程B持有的Integer.valueOf（1），线程B又等着被线程A持有的Integer.valueOf（2），结果出现大家都跑不下去的情景。</p>
+<p>​		出现线程死锁之后，点击JConsole线程面板的“检测到死锁”按钮，将出现一个新的“死锁”页签，如图所示。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021639698.png" style="zoom: 67%;" /></figure>
+
+<p>​		</p>
+<p>​		图中很清晰地显示了线程Thread-35在等待一个被线程Thread-36持有Integer对象，而点击线程Thread-36则显示它也在等待一个Integer对象，被线程Thread-35持有，这样两个线程就互相卡住，都不存在等到锁释放的希望了。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021641000.png" style="zoom: 67%;" /></figure>
+
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021646168.png" style="zoom: 67%;" /></figure>
+
+<p>​		</p>
 
 	
 
