@@ -65,6 +65,33 @@
 <p>题解：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># Write your MySQL query statement below</span><br><span class="line">select</span><br><span class="line">    sell_date,</span><br><span class="line">    count(distinct product) num_sold,</span><br><span class="line">    GROUP_CONCAT(distinct product) products</span><br><span class="line">from</span><br><span class="line">    activities</span><br><span class="line">group by sell_date</span><br><span class="line">order by sell_date;</span><br></pre></td></tr></table></figure>
 
+<p>解题思路&amp;知识点</p>
+<p>使用  group_concat()  将多行合并成一行(比较常用)</p>
+<p>语法：group_concat( [distinct] 要连接的字段 [order by 排序字段 asc&#x2F;desc ] [separator ‘分隔符’] )</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/patients-with-a-condition/">1527. 患某种疾病的患者</a></p>
+<p>SQL架构</p>
+<p>患者信息表： <code>Patients</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">+--------------+---------+</span><br><span class="line">| Column Name  | Type    |</span><br><span class="line">+--------------+---------+</span><br><span class="line">| patient_id   | int     |</span><br><span class="line">| patient_name | varchar |</span><br><span class="line">| conditions   | varchar |</span><br><span class="line">+--------------+---------+</span><br><span class="line">patient_id （患者 ID）是该表的主键。</span><br><span class="line">&#x27;conditions&#x27; （疾病）包含 0 个或以上的疾病代码，以空格分隔。</span><br><span class="line">这个表包含医院中患者的信息。</span><br></pre></td></tr></table></figure>
+
+<p>写一条 SQL 语句，查询患有 I 类糖尿病的患者 ID （patient_id）、患者姓名（patient_name）以及其患有的所有疾病代码（conditions）。I 类糖尿病的代码总是包含前缀 DIAB1 。</p>
+<p>按 任意顺序 返回结果表。</p>
+<p>查询结果格式如下示例所示。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">输入：</span><br><span class="line">Patients表：</span><br><span class="line">+------------+--------------+--------------+</span><br><span class="line">| patient_id | patient_name | conditions   |</span><br><span class="line">+------------+--------------+--------------+</span><br><span class="line">| 1          | Daniel       | YFEV COUGH   |</span><br><span class="line">| 2          | Alice        |              |</span><br><span class="line">| 3          | Bob          | DIAB100 MYOP |</span><br><span class="line">| 4          | George       | ACNE DIAB100 |</span><br><span class="line">| 5          | Alain        | DIAB201      |</span><br><span class="line">+------------+--------------+--------------+</span><br><span class="line">输出：</span><br><span class="line">+------------+--------------+--------------+</span><br><span class="line">| patient_id | patient_name | conditions   |</span><br><span class="line">+------------+--------------+--------------+</span><br><span class="line">| 3          | Bob          | DIAB100 MYOP |</span><br><span class="line">| 4          | George       | ACNE DIAB100 | </span><br><span class="line">+------------+--------------+--------------+</span><br><span class="line">解释：Bob 和 George 都患有代码以 DIAB1 开头的疾病。</span><br></pre></td></tr></table></figure>
+
+<p>题解：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">select </span><br><span class="line">    * </span><br><span class="line">from </span><br><span class="line">    patients </span><br><span class="line">where </span><br><span class="line">    conditions rlike &#x27;^DIAB1|.*\\sDIAB1&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>题解思路&amp;知识点</p>
+<ul>
+<li><p>糖尿病位于第一个时: 以DIAB1开始，即</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CONDITIONS REGEXP &#x27;^DIAB1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>糖尿病不是第一个时: 含有 空格DIAB1，即</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CONDITIONS REGEXP &#x27;\\sDIAB1，其中&#x27;\s&#x27;表示空格.</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>.代表任意字符，*代表次数不限制，也就是前面出现任意个字符，然后\s代表空格，连起来就是前面出现任意个字符，然后再来一个空格，接着就是DIAB1，满足这个条件</p>
+</li>
+</ul>
 
 	
 

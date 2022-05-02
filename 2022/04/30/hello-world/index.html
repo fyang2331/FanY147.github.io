@@ -409,13 +409,47 @@
 
 <p>​		查询结果表明：这台服务器的新生代Eden区（E，表示Eden）使用了6.2%的空间，两个Survivor区（S0、S1，表示Survivor0、Survivor1）里面都是空的，老年代（O，表示Old）和永久代（P，表示Permanent）则分别使用了41.42%和47.20%的空间。程序运行以来共发生MinorGC（YGC，表示YoungGC）16次，总耗时0.105秒，发生FullGC（FGC，表示FullGC）3次，FullGC总耗时（FGCT，表示FullGCTime）为0.472秒，所有GC总耗时（GCT，表示GCTime）为0.577秒。</p>
 <p>​		使用jstat工具在纯文本状态下监视虚拟机状态的变化，确实不如后面将会提到的VisualVM等可视化的监视工具直接以图表展现那样直观。但许多服务器管理员都习惯了在文本控制台中工作，直接在控制台中使用jstat命令依然是一种常用的监控方式。</p>
-<h3 id="3-2-3-jinfo：Java配置信息工具"><a href="#3-2-3-jinfo：Java配置信息工具" class="headerlink" title="3.2.3 jinfo：Java配置信息工具"></a>3.2.3 jinfo：Java配置信息工具</h3><p>​		jinfo（ConfigurationInfoforJava）的作用是实时地查看和调整虚拟机各项参数。使用jps命令的-v参数可以查看虚拟机启动时显式指定的参数列表，但如果想知道未被显式指定的参数的系统默认值，除了去找资料外，就只能使用jinfo的-flag选项进行查询了（如果只限于JDK1.6或以上版本的话，使用java-XX：+PrintFlagsFinal查看参数默认值也是一个很好的选择），jinfo还可以使用-sysprops选项把虚拟机进程的System.getProperties（）的内容打印出来。这个命令在JDK1.5时期已经随着Linux版的JDK发布，当时只提供了信息查询的功能，JDK1.6之后，jinfo在Windows和Linux平台都有提供，并且加入了运行期修改参数的能力，可以使用-flag[+|-]name或者-flagname&#x3D;value修改一部分运行期可写的虚拟机参数值。JDK1.6中，jinfo对于Windows平台功能仍然有较大限制，只提供了最基本的-flag选项。</p>
+<h3 id="3-2-3-jinfo：Java配置信息工具"><a href="#3-2-3-jinfo：Java配置信息工具" class="headerlink" title="3.2.3 jinfo：Java配置信息工具"></a>3.2.3 jinfo：Java配置信息工具</h3><p>​		jinfo（ConfigurationInfoforJava）的作用是实时地查看和调整虚拟机各项参数。使用jps命令的-v参数可以查看虚拟机启动时显式指定的参数列表，<strong>但如果想知道未被显式指定的参数的系统默认值</strong>，除了去找资料外，就只能使用jinfo的-flag选项进行查询了（如果只限于JDK1.6或以上版本的话，使用java-XX：+PrintFlagsFinal查看参数默认值也是一个很好的选择），jinfo还可以使用-sysprops选项把虚拟机进程的System.getProperties（）的内容打印出来。这个命令在JDK1.5时期已经随着Linux版的JDK发布，当时只提供了信息查询的功能，JDK1.6之后，jinfo在Windows和Linux平台都有提供，并且加入了运行期修改参数的能力，可以使用-flag[+|-]name或者-flagname&#x3D;value修改一部分运行期可写的虚拟机参数值。JDK1.6中，jinfo对于Windows平台功能仍然有较大限制，只提供了最基本的-flag选项。</p>
 <p>jinfo命令格式：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jinfo[option]pid</span><br></pre></td></tr></table></figure>
 
 <p>执行样例：查询CMSInitiatingOccupancyFraction参数值。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C：\＞jinfo-flag CMSInitiatingOccupancyFraction 1444</span><br><span class="line">-XX：CMSInitiatingOccupancyFraction=85</span><br></pre></td></tr></table></figure>
 
+<h3 id="3-2-4-jmap：Java内存映像工具"><a href="#3-2-4-jmap：Java内存映像工具" class="headerlink" title="3.2.4 jmap：Java内存映像工具"></a>3.2.4 jmap：Java内存映像工具</h3><p>​		jmap（MemoryMapforJava）命令用于生成堆转储快照（一般称为heapdump或dump文件）。如果不使用jmap命令，要想获取Java堆转储快照，还有一些比较“暴力”的手段：譬如在第2章中用过的-XX：+HeapDumpOnOutOfMemoryError参数，可以让虚拟机在OOM异常出现之后自动生成dump文件，通过-XX：+HeapDumpOnCtrlBreak参数则可以使用[Ctrl]+[Break]键让虚拟机生成dump文件，又或者在Linux系统下通过Kill-3命令发送进程退出信号“吓唬”一下虚拟机，也能拿到dump文件。</p>
+<p>​		jmap的作用并<strong>不仅仅是为了获取dump文件，它还可以查询finalize执行队列、Java堆和永久代的详细信息，如空间使用率、当前用的是哪种收集器</strong>等。</p>
+<p>​		和jinfo命令一样，jmap有不少功能在Windows平台下都是受限的，除了生成dump文件的dump选项和用于查看每个类的实例、空间占用统计的-histo选项在所有操作系统都提供之外，其余选项都只能在Linux&#x2F;Solaris下使用。</p>
+<p>jmap命令格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmap[option]vmid</span><br></pre></td></tr></table></figure>
+
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021002942.png" style="zoom:67%;" /></figure>
+
+<p>使用jmap生成dump文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">C：\Users\IcyFenix＞jmap-dump：format=b,file=eclipse.bin 3500</span><br><span class="line">Dumping heap to C：\Users\IcyFenix\eclipse.bin……</span><br><span class="line">Heap dump file created</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-5-jhat：虚拟机堆转储快照分析工具"><a href="#3-2-5-jhat：虚拟机堆转储快照分析工具" class="headerlink" title="3.2.5 jhat：虚拟机堆转储快照分析工具"></a>3.2.5 jhat：虚拟机堆转储快照分析工具</h3><p>​		SunJDK提供jhat（JVMHeapAnalysisTool）命令与jmap搭配使用，来分析jmap生成的堆转储快照。jhat内置了一个微型的HTTP&#x2F;HTML服务器，生成dump文件的分析结果后，可以在浏览器中查看。不过实事求是地说，在实际工作中，除非笔者手上真的没有别的工具可用，否则一般都不会去直接使用jhat命令来分析dump文件，主要原因有二：一是一般不会在部署应用程序的服务器上直接分析dump文件，即使可以这样做，也会尽量将dump文件复制到其他机器[1]上进行分析，因为分析工作是一个耗时而且消耗硬件资源的过程，既然都要在其他机器进行，就没有必要受到命令行工具的限制了；另一个原因是jhat的分析功能相对来说比较简陋，后文将会介绍到的VisualVM，以及专业用于分析dump文件的EclipseMemoryAnalyzer、IBMHeapAnalyzer[2]等工具，都能实现比jhat更强大更专业的分析功能。</p>
+<p>使用jhat分析dump文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">C：\Users\IcyFenix＞jhat eclipse.bin</span><br><span class="line">Reading from eclipse.bin……</span><br><span class="line">Dump file created Fri Nov 19 22：07：21 CST 2010</span><br><span class="line">Snapshot read,resolving……</span><br><span class="line">Resolving 1225951 objects……</span><br><span class="line">Chasing references,expect 245 dots……</span><br><span class="line">Eliminating duplicate references……</span><br><span class="line">Snapshot resolved.</span><br><span class="line">Started HTTP server on port 7000</span><br><span class="line">Server is ready.</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-6-jstack：Java堆栈跟踪工具"><a href="#3-2-6-jstack：Java堆栈跟踪工具" class="headerlink" title="3.2.6 jstack：Java堆栈跟踪工具"></a>3.2.6 jstack：Java堆栈跟踪工具</h3><p>​		jstack（StackTraceforJava）命令用于生成虚拟机当前时刻的线程快照（一般称为threaddump或者javacore文件）。线程快照就是当前虚拟机内每一条线程正在执行的方法堆栈的集合，生成线程快照的主要目的是定位线程出现长时间停顿的原因，如线程间死锁、死循环、请求外部资源导致的长时间等待等都是导致线程长时间停顿的常见原因。线程出现停顿的时候通过jstack来查看各个线程的调用堆栈，就可以知道没有响应的线程到底在后台做些什么事情，或者等待着什么资源。</p>
+<p>jstack命令格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstack[option]vmid</span><br></pre></td></tr></table></figure>
+
+<p>​		option选项的合法值与具体含义</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021017872.png" style="zoom:67%;" /></figure>
+
+<p>使用jstack查看线程堆栈，例子中的3500是通过jps命令查询到的LVMID。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">C：\Users\IcyFenix＞jstack-l 3500</span><br><span class="line">2010-11-19 23：11：26</span><br><span class="line">Full thread dump Java HotSpot（TM）64-Bit Server VM（17.1-b03 mixed mode）：</span><br><span class="line">&quot;[ThreadPool Manager]-Idle Thread&quot;daemon prio=6 tid=0x0000000039dd4000 nid=0xf50 in Object.wait（）[0x000000003c96f000]</span><br><span class="line">java.lang.Thread.State：WAITING（on object monitor）</span><br><span class="line">at java.lang.Object.wait（Native Method）</span><br><span class="line">-waiting on＜0x0000000016bdcc60＞（a org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor）</span><br><span class="line">at java.lang.Object.wait（Object.java：485）</span><br><span class="line">at org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor.run（Executor.java：106）</span><br><span class="line">-locked＜0x0000000016bdcc60＞（a org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor）</span><br><span class="line">Locked ownable synchronizers：</span><br><span class="line">-None</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-JDK的可视化工具"><a href="#3-3-JDK的可视化工具" class="headerlink" title="3.3 JDK的可视化工具"></a>3.3 JDK的可视化工具</h2><p>​		JDK中除了提供大量的命令行工具外，还有两个功能强大的可视化工具：JConsole和VisualVM，这两个工具是JDK的正式成员，没有被贴上“unsupportedandexperimental”的标签。</p>
+<p>​		其中JConsole是在JDK1.5时期就已经提供的虚拟机监控工具，而VisualVM在JDK1.6Update7中才首次发布，现在已经成为Sun（Oracle）主力推动的多合一故障处理工具，并且已经从JDK中分离出来成为可以独立发展的开源项目。</p>
+<p>​		为了避免本节的讲解成为对软件说明文档的简单翻译，笔者准备了一些代码样例，都是笔者特意编写的“反面教材”。后面将会使用这两款工具去监控、分析这几段代码存在的问题，算是本节简单的实战分析。读者可以把在可视化工具观察到的数据、现象，与前面两章中讲解的理论知识互相印证。</p>
+<h3 id="3-3-1-JConsole：Java监视与管理控制台"><a href="#3-3-1-JConsole：Java监视与管理控制台" class="headerlink" title="3.3.1 JConsole：Java监视与管理控制台"></a>3.3.1 JConsole：Java监视与管理控制台</h3><p>​		JConsole（JavaMonitoringandManagementConsole）是一种基于JMX的可视化监视、管理工具。它管理部分的功能是针对JMXMBean进行管理，由于MBean可以使用代码、中间件服务器的管理控制台或者所有符合JMX规范的软件进行访问，所以本节将会着重介绍JConsole监视部分的功能。</p>
+<ol>
+<li><p>启动JConsole</p>
+<p>通过JDK&#x2F;bin目录下的“jconsole.exe”启动JConsole后，将自动搜索出本机运行的所有虚拟机进程，不需要用户自己再使用jps来查询了，如图所示。双击选择其中一个进程即可开始监控，也可以使用下面的“远程进程”功能来连接远程服务器，对远程虚拟机进行监控。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205021024953.png" style="zoom:67%;" /></figure></li>
+</ol>
 
 	
 
