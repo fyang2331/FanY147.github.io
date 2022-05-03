@@ -23,12 +23,221 @@
 	</header>
 
 	<main>
-		<article>
-	<h1>Tags</h1>
+		<h1>Tags</h1>
 
+<ul class="archive">
 	
+		
+		<li class="archive__year archive__expendable">
+			<span>JVM</span>
+			<ul>
+			
+				
+					
+					
+
+				
+					
+					
+
+				
+			
+				
+					
+					
+						<li class="archive__entry"><a href="/2022/04/30/JVM/">JVM虚拟执行子系统</a></li>
+					
+
+				
+					
+					
+
+				
+					
+					
+
+				
+			
+				
+					
+					
+						<li class="archive__entry"><a href="/2022/05/03/JVM-%E8%87%AA%E5%8A%A8%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/">JVM-自动内存管理机制</a></li>
+					
+
+				
+					
+					
+
+				
+					
+					
+
+				
+			
+			</ul>
+		</li>
 	
-</article>
+		
+		<li class="archive__year archive__expendable">
+			<span>JAVA</span>
+			<ul>
+			
+				
+					
+					
+
+				
+					
+					
+
+				
+			
+				
+					
+					
+
+				
+					
+					
+						<li class="archive__entry"><a href="/2022/04/30/JVM/">JVM虚拟执行子系统</a></li>
+					
+
+				
+					
+					
+
+				
+			
+				
+					
+					
+
+				
+					
+					
+						<li class="archive__entry"><a href="/2022/05/03/JVM-%E8%87%AA%E5%8A%A8%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/">JVM-自动内存管理机制</a></li>
+					
+
+				
+					
+					
+
+				
+			
+			</ul>
+		</li>
+	
+		
+		<li class="archive__year archive__expendable">
+			<span>Learning</span>
+			<ul>
+			
+				
+					
+					
+						<li class="archive__entry"><a href="/2022/05/01/textmysql/">MySQL题解思路</a></li>
+					
+
+				
+					
+					
+
+				
+			
+				
+					
+					
+
+				
+					
+					
+
+				
+					
+					
+						<li class="archive__entry"><a href="/2022/04/30/JVM/">JVM虚拟执行子系统</a></li>
+					
+
+				
+			
+				
+					
+					
+
+				
+					
+					
+
+				
+					
+					
+						<li class="archive__entry"><a href="/2022/05/03/JVM-%E8%87%AA%E5%8A%A8%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/">JVM-自动内存管理机制</a></li>
+					
+
+				
+			
+			</ul>
+		</li>
+	
+		
+		<li class="archive__year archive__expendable">
+			<span>MySQL</span>
+			<ul>
+			
+				
+					
+					
+
+				
+					
+					
+						<li class="archive__entry"><a href="/2022/05/01/textmysql/">MySQL题解思路</a></li>
+					
+
+				
+			
+				
+					
+					
+
+				
+					
+					
+
+				
+					
+					
+
+				
+			
+				
+					
+					
+
+				
+					
+					
+
+				
+					
+					
+
+				
+			
+			</ul>
+		</li>
+	
+</ul>
+
+<script>
+	const expandables = document.querySelectorAll('.archive__expendable')
+	for(let i = 0; i < expandables.length; i++) {
+		expandables[i].addEventListener('click', (e) => {
+			e.stopPropagation()
+			expandables[i].classList.toggle('archive__expendable_collapsed')
+		})
+	}
+</script>
 
 	</main>
 
