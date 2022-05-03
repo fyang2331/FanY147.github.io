@@ -611,6 +611,98 @@
 <p>​		观察这个案例，发现平时的MinorGC时间很短，原因是新生代的绝大部分对象都是可清除的，在MinorGC之后Eden和Survivor基本上处于完全空闲的状态。而在分析数据文件期间，800MB的Eden空间很快被填满从而引发GC，但MinorGC之后，新生代中绝大部分对象依然是存活的。我们知道ParNew收集器使用的是复制算法，这个算法的高效是建立在大部分对象都“朝生夕灭”的特性上的，如果存活对象过多，把这些对象复制到Survivor并维持这些对象引用的正确就成为一个沉重的负担，因此导致GC暂停时间明显变长。</p>
 <p>​		如果不修改程序，仅从GC调优的角度去解决这个问题，可以考虑将Survivor空间去掉（加入参数-XX：SurvivorRatio&#x3D;65536、-XX：MaxTenuringThreshold&#x3D;0或者-XX：+AlwaysTenure），让新生代中存活的对象在第一次MinorGC后立即进入老年代，等到MajorGC的时候再清理它们。这种措施可以治标，但也有很大副作用，治本的方案需要修改程序，因为这里的问题产生的根本原因是用HashMap＜Long,Long＞结构来存储数据文件空间效率太低。</p>
 <p>​		下面具体分析一下空间效率。在HashMap＜Long,Long＞结构中，只有Key和Value所存放的两个长整型数据是有效数据，共16B（2×8B）。这两个长整型数据包装成java.lang.Long对象之后，就分别具有8B的MarkWord、8B的Klass指针，在加8B存储数据的long值。在这两个Long对象组成Map.Entry之后，又多了16B的对象头，然后一个8B的next字段和4B的int型的hash字段，为了对齐，还必须添加4B的空白填充，最后还有HashMap中对这个Entry的8B的引用，这样增加两个长整型数字，实际耗费的内存为（Long（24B）×2）+Entry（32B）+HashMapRef（8B）&#x3D;88B，空间效率为16B&#x2F;88B&#x3D;18%，实在太低了。</p>
+<h2 id="4-3-本章小结"><a href="#4-3-本章小结" class="headerlink" title="4.3 本章小结"></a>4.3 本章小结</h2><p>​		Java虚拟机的内存管理与垃圾收集是虚拟机结构体系中最重要的组成部分，对程序的性能和稳定性有非常大的影响，笔者从理论知识、异常现象、代码、工具、案例、实战等几个方面对其进行了讲解，希望读者有所收获。本书关于虚拟机内存管理部分到此为止就结束了，后面将开始介绍Class文件与虚拟机执行子系统方面的知识。</p>
+<hr>
+<h1 id="五-类文件结构"><a href="#五-类文件结构" class="headerlink" title="五 类文件结构"></a>五 类文件结构</h1><p>​		代码编译的结果从本地机器码转变为字节码，是存储格式发展的一小步，却是编程语言发展的一大步。</p>
+<h2 id="5-1-概述"><a href="#5-1-概述" class="headerlink" title="5.1 概述"></a>5.1 概述</h2><p>​		记得在第一节计算机程序课上我的老师就讲过：“计算机只认识0和1，所以我们写的程序需要经编译器翻译成由0和1构成的二进制格式才能由计算机执行”。10多年时间过去了，今天的计算机仍然只能识别0和1，但由于最近10年内虚拟机以及大量建立在虚拟机之上的程序语言如雨后春笋般出现并蓬勃发展，将我们编写的程序编译成二进制本地机器码（NativeCode）已不再是唯一的选择，越来越多的程序语言选择了与操作系统和机器指令集无关的、平台中立的格式作为程序编译后的存储格式。</p>
+<h2 id="5-2-无关性的基石"><a href="#5-2-无关性的基石" class="headerlink" title="5.2 无关性的基石"></a>5.2 无关性的基石</h2><p>​		如果计算机的CPU指令集只有x86一种，操作系统也只有Windows一种，那也许Java语言就不会出现。Java在刚刚诞生之时曾经提出过一个非常著名的宣传口号：“<strong>一次编写，到处运行</strong>（WriteOnce,RunAnywhere）”，这句话充分表达了软件开发人员对冲破平台界限的渴求。在无时无刻不充满竞争的IT领域，不可能只有Wintel[1]存在，我们也不希望只有Wintel存在，各种不同的硬件体系结构和不同的操作系统肯定会长期并存发展。“与平台无关”的理想最终实现在操作系统的应用层上：Sun公司以及其他虚拟机提供商发布了许多可以运行在各种不同平台上的虚拟机，这些虚拟机都可以<strong>载入和执行同一种平台无关的字节码</strong>，从而实现了程序的“一次编写，到处运行”。</p>
+<p>​		各种不同平台的虚拟机与所有平台都统一使用的程序存储格式——<strong>字节码（ByteCode）是构成平台无关性的基石</strong>，但本节标题中刻意省略了“平台”二字，那是因为笔者注意到虚拟机的另外一种中立特性——语言无关性正越来越被开发者所重视。到目前为止，或许大部分程序员都还认为Java虚拟机执行Java程序是一件理所当然和天经地义的事情。但在Java发展之初，设计者就曾经考虑过并实现了让其他语言运行在Java虚拟机之上的可能性，他们在发布规范文档的时候，也刻意把Java的规范拆分成了Java语言规范《The Java Language Specification》及Java虚拟机规范《The Java Virtual Machine Specification》。并且在1997年发布的第一版Java虚拟机规范中就曾经承诺过：“In the future, we will consider bounded extensions to the Java virtual machine to provide better support for other languages”（在未来，我们会对Java虚拟机进行适当的扩展，以便更好地支持其他语言运行于JVM之上），当Java虚拟机发展到JDK1.7～1.8的时候，JVM设计者通过JSR-292基本兑现了这个承诺。</p>
+<p>​		时至今日，商业机构和开源机构已经在Java语言之外发展出一大批在Java虚拟机之上运行的语言，如Clojure、Groovy、JRuby、Jython、Scala等。使用过这些语言的开发者可能还不是非常多，但是听说过的人肯定已经不少，随着时间的推移，谁能保证日后Java虚拟机在语言无关性上的优势不会赶上甚至超越它在平台无关性上的优势呢？实现语言无关性的基础仍然是虚拟机和字节码存储格式。Java虚拟机不和包括Java在内的任何语言绑定，它<strong>只与“Class文件”这种特定的二进制文件格式所关联</strong>，<strong>Class文件中包含了Java虚拟机指令集和符号表以及若干其他辅助信息</strong>。基于安全方面的考虑，Java虚拟机规范要求在Class文件中使用许多强制性的语法和结构化约束，但任一门功能性语言都可以表示为一个能被Java虚拟机所接受的有效的Class文件。作为一个通用的、机器无关的执行平台，任何其他语言的实现者都可以将Java虚拟机作为语言的产品交付媒介。例如，使用Java编译器可以把Java代码编译为存储字节码的Class文件，使用JRuby等其他语言的编译器一样可以把程序代码编译成Class文件，虚拟机并不关心Class的来源是何种语言。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031435238.png" style="zoom:67%;" /></figure>
+
+<p>​		Java语言中的各种变量、关键字和运算符号的语义最终都是由多条字节码命令组合而成的，因此字节码命令所能提供的语义描述能力肯定会比Java语言本身更加强大。因此，<strong>有一些Java语言本身无法有效支持的语言特性不代表字节码本身无法有效支持，这也为其他语言实现一些有别于Java的语言特性提供了基础</strong>。</p>
+<h2 id="5-3-Class类文件的结构"><a href="#5-3-Class类文件的结构" class="headerlink" title="5.3 Class类文件的结构"></a>5.3 Class类文件的结构</h2><p>​		注意任何一个Class文件都对应着唯一一个类或接口的定义信息，但反过来说，类或接口并不一定都得定义在文件里（譬如类或接口也可以通过类加载器直接生成）。本章中，笔者只是通俗地将任意一个有效的类或接口所应当满足的格式称为“Class文件格式”，实际上它并不一定以磁盘文件的形式存在。</p>
+<p>​		Class文件是一组以8位字节为基础单位的二进制流，各个数据项目严格按照顺序紧凑地排列在Class文件之中，中间没有添加任何分隔符，这使得整个Class文件中存储的内容几乎全部是程序运行的必要数据，没有空隙存在。当遇到需要占用8位字节以上空间的数据项时，则会按照高位在前的方式分割成若干个8位字节进行存储。</p>
+<p>​		根据Java虚拟机规范的规定，Class文件格式采用一种类似于C语言结构体的伪结构来存储数据，这种伪结构中只有两种数据类型：<strong>无符号数和表</strong>，后面的解析都要以这两种数据类型为基础，所以这里要先介绍这两个概念。</p>
+<p>​		<strong>无符号数属于基本的数据类型</strong>，以<strong>u1、u2、u4、u8来分别代表1个字节、2个字节、4个字节和8个字节的无符号数</strong>，无符号数可以用来描述数字、索引引用、数量值或者按照UTF-8编码构成字符串值。</p>
+<p>​		<strong>表是由多个无符号数或者其他表作为数据项构成的复合数据类型</strong>，所有表都习惯性地以<strong>“_info”结尾</strong>。表用于描述有层次关系的复合结构的数据，整个Class文件本质上就是一张表，它由表所示的数据项构成。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031548601.png" style="zoom:67%;" /></figure>
+
+<p>​		无论是无符号数还是表，当需要描述同一类型但数量不定的多个数据时，经常会使用一个前置的容量计数器加若干个连续的数据项的形式，这时称这一系列连续的某一类型的数据为某一类型的集合。</p>
+<h3 id="5-3-1-魔数与Class文件的版本"><a href="#5-3-1-魔数与Class文件的版本" class="headerlink" title="5.3.1 魔数与Class文件的版本"></a>5.3.1 魔数与Class文件的版本</h3><p>​		每个Class文件的头4个字节称为魔数（MagicNumber），它的唯一作用是确定这个文件是否为一个能被虚拟机接受的Class文件。很多文件存储标准中都使用魔数来进行身份识别，譬如图片格式，如gif或者jpeg等在文件头中都存有魔数。使用魔数而不是扩展名来进行识别主要是基于安全方面的考虑，因为文件扩展名可以随意地改动。文件格式的制定者可以自由地选择魔数值，只要这个魔数值还没有被广泛采用过同时又不会引起混淆即可。Class文件的魔数的获得很有“浪漫气息”，值为：0xCAFEBABE（咖啡宝贝？），这个魔数值在Java还称做“Oak”语言的时候（大约是1991年前后）就已经确定下来了。它还有一段很有趣的历史，据Java开发小组最初的关键成员Patrick Naughton所说：“我们一直在寻找一些好玩的、容易记忆的东西，选择0xCAFEBABE是因为它象征着著名咖啡品牌Peet’s Coffee中深受欢迎的Baristas咖啡”，这个魔数似乎也预示着日后“Java”这个商标名称的出现。</p>
+<p>​		紧接着魔数的4个字节存储的是Class文件的版本号：第5和第6个字节是次版本号（MinorVersion），第7和第8个字节是主版本号（MajorVersion）。Java的版本号是从45开始的，JDK1.1之后的每个JDK大版本发布主版本号向上加1（JDK1.0～1.1使用了45.0～45.3的版本号），高版本的JDK能向下兼容以前版本的Class文件，但不能运行以后版本的Class文件，即使文件格式并未发生任何变化，虚拟机也必须拒绝执行超过其版本号的Class文件。</p>
+<p>​		例如，JDK1.1能支持版本号为45.0～45.65535的Class文件，无法执行版本号为46.0以上的Class文件，而JDK1.2则能支持45.0～46.65535的Class文件。现在，最新的JDK版本为1.7，可生成的Class文件主版本号最大值为51.0。</p>
+<p>​		为了讲解方便，笔者准备了一段最简单的Java代码（见代码清单），本章后面的内容都将以这段小程序使用JDK 1.6编译输出的Class文件为基础来进行讲解。</p>
+<p>代码清单：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.fenixsoft.clazz；</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestClass</span>&#123;</span><br><span class="line"><span class="keyword">private</span> <span class="type">int</span> m；</span><br><span class="line"><span class="keyword">public</span> <span class="type">int</span> inc（）&#123;</span><br><span class="line"><span class="keyword">return</span> m+<span class="number">1</span>；</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​		下图显示的是使用十六进制编辑器WinHex打开这个Class文件的结果，可以清楚地看见开头4个字节的十六进制表示是0xCAFEBABE，代表次版本号的第5个和第6个字节值为0x0000，而主版本号的值为0x0032，也即是十进制的50，该版本号说明这个文件是可以被JDK1.6或以上版本虚拟机执行的Class文件。</p>
+<figure class="figure"><img src="../../public/img/jvm5-3.png" style="zoom:67%;" /></figure>
+
+<p>列出从JDK1.1到13之间，主流JDK版本编译器输出的默认的和可支持的Class文件版本号。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031554487.png" style="zoom:67%;" /></figure>
+
+<p>​		注：从JDK9开始，Javac编译器不再支持使用-source参数编译版本号小于1.5的源码。</p>
+<p>​		关于次版本号，曾经在现代Java（即Java2）出现前被短暂使用过，JDK1.0.2支持的版本45.0～45.3（包括45.0～45.3）。JDK1.1支持版本45.0～45.65535，从JDK1.2以后，直到JDK12之前次版本号均未使用，全部固定为零。而到了JDK12时期，由于JDK提供的功能集已经非常庞大，有一些复杂的新特性需要以“公测”的形式放出，所以设计者重新启用了副版本号，将它用于标识“技术预览版”功能特性的支持。如果Class文件中使用了该版本JDK尚未列入正式特性清单中的预览功能，则必须把次版本号标识为65535，以便Java虚拟机在加载类文件时能够区分出来。</p>
+<h3 id="5-3-2-常量池"><a href="#5-3-2-常量池" class="headerlink" title="5.3.2 常量池"></a>5.3.2 常量池</h3><p>​		紧接着主、次版本号之后的是常量池入口，常量池可以比喻为Class文件里的资源仓库，它是Class文件结构中与其他项目关联最多的数据，通常也是占用Class文件空间最大的数据项目之一，另外，它还是在Class文件中第一个出现的表类型数据项目。</p>
+<p>​		由于常量池中常量的数量是不固定的，所以在常量池的入口需要放置一项u2类型的数据，代表常量池容量计数值（constant_pool_count）。与Java中语言习惯不同，这个容量计数是从1而不是0开始的，如图所示，常量池容量（偏移地址：0x00000008）为十六进制数0x0016，即十进制的22，这就代表常量池中有21项常量，索引值范围为1～21。在Class文件格式规范制定之时，设计者将第0项常量空出来是有特殊考虑的，这样做的目的在于，如果后面某些指向常量池的索引值的数据在特定情况下需要表达“不引用任何一个常量池项目”的含义，可以把索引值设置为0来表示。Class文件结构中只有常量池的容量计数是从1开始，对于其他集合类型，包括接口索引集合、字段表集合、方法表集合等的容量计数都与一般习惯相同，是从0开始。</p>
+<figure class="figure"><img src="../../public/img/jvm5-5.png" style="zoom:67%;" /></figure>
+
+<p>​		常量池中主要存放两大类常量：字面量（Literal）和符号引用（SymbolicReferences）。字面量比较接近于Java语言层面的常量概念，如文本字符串、被声明为final的常量值等。而符号引用则属于编译原理方面的概念，主要包括下面几类常量：·</p>
+<ul>
+<li>被模块导出或者开放的包（Package）·</li>
+<li>类和接口的全限定名（FullyQualifiedName）·</li>
+<li>字段的名称和描述符（Descriptor）·</li>
+<li>方法的名称和描述符·</li>
+<li>方法句柄和方法类型（MethodHandle、MethodType、InvokeDynamic）·</li>
+</ul>
+<p>​		动态调用点和动态常量（Dynamically-ComputedCallSite、Dynamically-ComputedConstant）Java代码在进行Javac编译的时候，并不像C和C++那样有“连接”这一步骤，而是在虚拟机加载Class文件的时候进行动态连接。也就是说，在Class文件中不会保存各个方法、字段最终在内存中的布局信息，这些字段、方法的符号引用不经过虚拟机在运行期转换的话是无法得到真正的内存入口地址，也就无法直接被虚拟机使用的。当虚拟机做类加载时，将会从常量池获得对应的符号引用，再在类创建时或运行时解析、翻译到具体的内存地址之中。关于类的创建和动态连接的内容，在下一章介绍虚拟机类加载过程时再详细讲解。</p>
+<p>​		常量池中每一项常量都是一个表，最初常量表中共有11种结构各不相同的表结构数据，后来为了更好地支持动态语言调用，额外增加了4种动态语言相关的常量，为了支持Java模块化系统（Jigsaw），又加入了CONSTANT_Module_info和CONSTANT_Package_info两个常量，所以截至JDK13，常量表中分别有17种不同类型的常量。</p>
+<p>​		这17类表都有一个共同的特点，表结构起始的第一位是个u1类型的标志位（tag，取值见表中标志列），代表着当前常量属于哪种常量类型。17种常量类型所代表的具体含义如表所示。</p>
+<p>常量池表：</p>
+<figure class="figure"><img src="../../public/img/jvm5-6.png" style="zoom:67%;" /></figure>
+
+<p>​		之所以说常量池是最烦琐的数据，是因为这17种常量类型各自有着完全独立的数据结构，两两之间并没有什么共性和联系，因此只能逐项进行讲解。</p>
+<p>​		请读者回头看看上图中常量池的第一项常量，它的标志位（偏移地址：0x0000000A）是0x07，查常量池表的标志列可知这个常量属于CONSTANT_Class_info类型，此类型的常量代表一个类或者接口的符号引用。CONSTANT_Class_info的结构比较简单，如表所示。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031709483.png" style="zoom:67%;" /></figure>
+
+<p>​		tag是标志位，它用于区分常量类型；name_index是常量池的索引值，它指向常量池中一个CONSTANT_Utf8_info类型常量，此常量代表了这个类（或者接口）的全限定名，本例中的name_index值（偏移地址：0x0000000B）为0x0002，也就是指向了常量池中的第二项常量。继续从图中查找第二项常量，它的标志位（地址：0x0000000D）是0x01，查表可知确实是一个CONSTANT_Utf8_info类型的常量。CONSTANT_Utf8_info类型的结构如表所示。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031712045.png" style="zoom: 67%;" /></figure>
+
+<p>​		length值说明了这个UTF-8编码的字符串长度是多少字节，它后面紧跟着的长度为length字节的连续数据是一个使用UTF-8缩略编码表示的字符串。UTF-8缩略编码与普通UTF-8编码的区别是：从’\u0001’到’\u007f’之间的字符（相当于1～127的ASCII码）的缩略编码使用一个字节表示，从’\u0080’到’\u07ff’之间的所有字符的缩略编码用两个字节表示，从’\u0800’开始到’\uffff’之间的所有字符的缩略编码就按照普通UTF-8编码规则使用三个字节表示。</p>
+<p>​		顺便提一下，由于Class文件中方法、字段等都需要引用CONSTANT_Utf8_info型常量来描述名称，所以CONSTANT_Utf8_info型常量的最大长度也就是Java中方法、字段名的最大长度。而这里的最大长度就是length的最大值，既u2类型能表达的最大值65535。所以Java程序中如果定义了超过64KB英文字符的变量或方法名，即使规则和全部字符都是合法的，也会无法编译。</p>
+<p>​		本例中这个字符串的length值（偏移地址：0x0000000E）为0x001D，也就是长29个字节，往后29个字节正好都在1～127的ASCII码范围以内，内容为“org&#x2F;fenixsoft&#x2F;clazz&#x2F;TestClass”，有兴趣的读者可以自己逐个字节换算一下，换算结果如图中选中的部分所示。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031724080.png" style="zoom:67%;" /></figure>
+
+<p>​		到此为止，我们仅仅分析了TestClass.class常量池中21个常量中的两个，还未提到的其余19个常量都可以通过类似的方法逐一计算出来，为了避免计算过程占用过多的版面篇幅，后续的19个常量的计算过程就不手工去做了，而借助计算机软件来帮忙完成。在JDK的bin目录中，Oracle公司已经为我们准备好一个专门用于分析Class文件字节码的工具：javap。代码清单6-2中列出了使用javap工具的verbose参数输出的TestClass.class文件字节码内容（为节省篇幅，此清单中省略了常量池以外的信息）。笔者曾经提到过Class文件中还有很多数据项都要引用常量池中的常量，建议读者不妨在本页做个记号，因为代码清单中的内容在后续的讲解之中会频繁使用到。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">C:\&gt;javap -verbose TestClass</span><br><span class="line">Compiled from &quot;TestClass.java&quot;</span><br><span class="line">public class org.fenixsoft.clazz.TestClass extends java.lang.Object</span><br><span class="line">SourceFile: &quot;TestClass.java&quot;</span><br><span class="line">minor version: 0</span><br><span class="line">major version: 50</span><br><span class="line">Constant pool:</span><br><span class="line">const #1 = class #2; // org/fenixsoft/clazz/TestClass</span><br><span class="line">const #2 = Asciz org/fenixsoft/clazz/TestClass;</span><br><span class="line">const #3 = class #4; // java/lang/Object</span><br><span class="line">const #4 = Asciz java/lang/Object;</span><br><span class="line">const #5 = Asciz m;</span><br><span class="line">const #6 = Asciz I;</span><br><span class="line">const #7 = Asciz &lt;init&gt;;</span><br><span class="line">const #8 = Asciz ()V;</span><br><span class="line">const #9 = Asciz Code;</span><br><span class="line">const #10 = Method #3.#11; // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">const #11 = NameAndType #7:#8;// &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">const #12 = Asciz LineNumberTable;</span><br><span class="line">const #13 = Asciz LocalVariableTable;</span><br><span class="line">const #14 = Asciz this;</span><br><span class="line">const #15 = Asciz Lorg/fenixsoft/clazz/TestClass;;</span><br><span class="line">const #16 = Asciz inc;</span><br><span class="line">const #17 = Asciz ()I;</span><br><span class="line">const #18 = Field #1.#19; // org/fenixsoft/clazz/TestClass.m:I</span><br><span class="line">const #19 = NameAndType #5:#6; // m:I</span><br><span class="line">const #20 = Asciz SourceFile;</span><br><span class="line">const #21 = Asciz TestClass.java;</span><br></pre></td></tr></table></figure>
+
+<p>​		计算机已经帮我们把整个常量池的21项常量都计算了出来，并且第1、2项常量的计算结果与我们手工计算的结果完全一致。仔细看一下会发现，其中有些常量似乎从来没有在代码中出现过，如“I”“V”“”“LineNumberTable”“LocalVariableTable”等，这些看起来在源代码中不存在的常量是哪里来的？</p>
+<p>​		这部分常量的确不来源于Java源代码，它们都是编译器自动生成的，会被后面即将讲到的字段表（field_info）、方法表（method_info）、属性表（attribute_info）所引用，它们将会被用来描述一些不方便使用“固定字节”进行表达的内容，譬如描述方法的返回值是什么，有几个参数，每个参数的类型是什么。因为Java中的“类”是无穷无尽的，无法通过简单的无符号数来描述一个方法用到了什么类，因此在描述方法的这些信息时，需要引用常量表中的符号引用进行表达。这部分内容将在后面进一步详细阐述。最后，笔者将17种常量项的结构定义总结为下表。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031723918.png" style="zoom:67%;" /></figure>
+
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031723490.png" style="zoom:95%;" /></figure>
+
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031723791.png" style="zoom:90%;" /></figure>
+
+<h3 id="5-3-3-访问标志"><a href="#5-3-3-访问标志" class="headerlink" title="5.3.3 访问标志"></a>5.3.3 访问标志</h3><p>​		在常量池结束之后，紧接着的2个字节代表访问标志（access_flags），这个标志用于识别一些类或者接口层次的访问信息，包括：这个Class是类还是接口；是否定义为public类型；是否定义为abstract类型；如果是类的话，是否被声明为final；等等。具体的标志位以及标志的含义见表：</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031723584.png" style="zoom: 80%;" /></figure>
+
+<p>​		access_flags中一共有16个标志位可以使用，当前只定义了其中9个，没有使用到的标志位要求一律为零。以代码清单中的代码为例，TestClass是一个普通Java类，不是接口、枚举、注解或者模块，被public关键字修饰但没有被声明为final和abstract，并且它使用了JDK1.2之后的编译器进行编译，因此它的ACC_PUBLIC、ACC_SUPER标志应当为真，而ACC_FINAL、ACC_INTERFACE、ACC_ABSTRACT、ACC_SYNTHETIC、ACC_ANNOTATION、ACC_ENUM、ACC_MODULE这七个标志应当为假，因此它的access_flags的值应为：0x0001|0x0020&#x3D;0x0021。从图6-5中看到，access_flags标志（偏移地址：0x000000EF）的确为0x0021。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031724525.png" style="zoom:67%;" /></figure>
+
+<h3 id="5-3-4-类索引、父类索引与接口索引集合"><a href="#5-3-4-类索引、父类索引与接口索引集合" class="headerlink" title="5.3.4 类索引、父类索引与接口索引集合"></a>5.3.4 类索引、父类索引与接口索引集合</h3><p>​		类索引（this_class）和父类索引（super_class）都是一个u2类型的数据，而接口索引集合（interfaces）是一组u2类型的数据的集合，Class文件中由这三项数据来确定该类型的继承关系。类索引用于确定这个类的全限定名，父类索引用于确定这个类的父类的全限定名。由于Java语言不允许多重继承，所以父类索引只有一个，除了java.lang.Object之外，所有的Java类都有父类，因此除了java.lang.Object外，所有Java类的父类索引都不为0。接口索引集合就用来描述这个类实现了哪些接口，这些被实现的接口将按implements关键字（如果这个Class文件表示的是一个接口，则应当是extends关键字）后的接口顺序从左到右排列在接口索引集合中。</p>
+<p>​		类索引、父类索引和接口索引集合都按顺序排列在访问标志之后，类索引和父类索引用两个u2类型的索引值表示，它们各自指向一个类型为CONSTANT_Class_info的类描述符常量，通过CONSTANT_Class_info类型的常量中的索引值可以找到定义在CONSTANT_Utf8_info类型的常量中的全限定名字符串。下图6-6演示了代码清单中代码的类索引查找过程。</p>
+<figure class="figure"><img src="../../public/img/jvm5-15.png" style="zoom:67%;" /></figure>
+
+<p>​		对于接口索引集合，入口的第一项u2类型的数据为接口计数器（interfaces_count），表示索引表的容量。如果该类没有实现任何接口，则该计数器值为0，后面接口的索引表不再占用任何字节。代码清单中的代码的类索引、父类索引与接口表索引的内容如图所示。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205031736717.png" style="zoom:67%;" /></figure>
+
+<p>​		</p>
+<p>从偏移地址0x000000F1开始的3个u2类型的值分别为0x0001、0x0003、0x0000，也就是类索引为1，父类索引为3，接口索引集合大小为0。查询前面代码清单6-2中javap命令计算出来的常量池，找出对应的类和父类的常量，结果如代码清单1所示。</p>
+<p>代码清单1：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">const #1 = class #2; // org/fenixsoft/clazz/TestClass</span><br><span class="line">const #2 = Asciz org/fenixsoft/clazz/TestClass;</span><br><span class="line">const #3 = class #4; // java/lang/Object</span><br><span class="line">const #4 = class Asciz; java/lang/Object</span><br></pre></td></tr></table></figure>
+
 
 	
 
