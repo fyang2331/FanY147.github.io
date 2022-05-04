@@ -136,6 +136,37 @@
 <p>代码清单1：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">const #1 = class #2; // org/fenixsoft/clazz/TestClass</span><br><span class="line">const #2 = Asciz org/fenixsoft/clazz/TestClass;</span><br><span class="line">const #3 = class #4; // java/lang/Object</span><br><span class="line">const #4 = class Asciz; java/lang/Object</span><br></pre></td></tr></table></figure>
 
+<h3 id="5-3-5-字段表集合"><a href="#5-3-5-字段表集合" class="headerlink" title="5.3.5 字段表集合"></a>5.3.5 字段表集合</h3><p>​		字段表（field_info）用于描述接口或者类中声明的变量。Java语言中的“字段”（Field）包括类级变量以及实例级变量，但不包括在方法内部声明的局部变量。读者可以回忆一下在Java语言中描述一个字段可以包含哪些信息。字段可以包括的修饰符有字段的作用域（public、private、protected修饰符）、是实例变量还是类变量（static修饰符）、可变性（final）、并发可见性（volatile修饰符，是否强制从主内存读写）、可否被序列化（transient修饰符）、字段数据类型（基本类型、对象、数组）、字段名称。上述这些信息中，各个修饰符都是布尔值，要么有某个修饰符，要么没有，很适合使用标志位来表示。而字段叫做什么名字、字段被定义为什么数据类型，这些都是无法固定的，只能引用常量池中的常量来描述。表中列出了字段表的最终格式。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205041054419.png" style="zoom:67%;" /></figure>
+
+<p>​		字段修饰符放在access_flags项目中，它与类中的access_flags项目是非常类似的，都是一个u2的数据类型，其中可以设置的标志位和含义如表所示。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205041055397.png" style="zoom:67%;" /></figure>
+
+<p>​		很明显，由于语法规则的约束，ACC_PUBLIC、ACC_PRIVATE、ACC_PROTECTED三个标志最多只能选择其一，ACC_FINAL、ACC_VOLATILE不能同时选择。接口之中的字段必须有ACC_PUBLIC、ACC_STATIC、ACC_FINAL标志，这些都是由Java本身的语言规则所导致的。</p>
+<p>​		跟随access_flags标志的是两项索引值：name_index和descriptor_index。它们都是对常量池项的引用，分别代表着字段的简单名称以及字段和方法的描述符。现在需要解释一下“简单名称”“描述符”以及前面出现过多次的“全限定名”这三种特殊字符串的概念。</p>
+<p>​		全限定名和简单名称很好理解，以代码清单中的代码为例，“org&#x2F;fenixsoft&#x2F;clazz&#x2F;TestClass”是这个类的全限定名，仅仅是把类全名中的“.”替换成了“&#x2F;”而已，为了使连续的多个全限定名之间不产生混淆，在使用时最后一般会加入一个“；”号表示全限定名结束。简单名称则就是指没有类型和参数修饰的方法或者字段名称，这个类中的inc()方法和m字段的简单名称分别就是“inc”和“m”。</p>
+<p>​		相比于全限定名和简单名称，方法和字段的描述符就要复杂一些。描述符的作用是用来描述字段的数据类型、方法的参数列表（包括数量、类型以及顺序）和返回值。根据描述符规则，基本数据类型（byte、char、double、float、int、long、short、boolean）以及代表无返回值的void类型都用一个大写字符来表示，而对象类型则用字符L加对象的全限定名来表示，详见表。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205041058095.png" style="zoom:67%;" /></figure>
+
+<p>​		注：void类型在《Java虚拟机规范》之中单独列出为“VoidDescriptor”，笔者为了结构统一，将其列在基本数据类型中一起描述。对于数组类型，每一维度将使用一个前置的“[”字符来描述，如一个定义为“java.lang.String[][]”类型的二维数组将被记录成“[[Ljava&#x2F;lang&#x2F;String；”，一个整型数组“int[]”将被记录成“[I”。</p>
+<p>​		用描述符来描述方法时，按照先参数列表、后返回值的顺序描述，参数列表按照参数的严格顺序放在一组小括号“()”之内。如方法voidinc()的描述符为“()V”，方法java.lang.StringtoString()的描述符为“()Ljava&#x2F;lang&#x2F;String；”，方法intindexOf(char[]source，intsourceOffset，intsourceCount，char[]target，inttargetOffset，inttargetCount，intfromIndex)的描述符为“([CII[CIII)I”。</p>
+<p>​		对于代码清单所编译的TestClass.class文件来说，字段表集合从地址0x000000F8开始，第一个u2类型的数据为容量计数器fields_count，如图所示，其值为0x0001，说明这个类只有一个字段表数据。接下来紧跟着容量计数器的是access_flags标志，值为0x0002，代表private修饰符的ACC_PRIVATE标志位为真（ACC_PRIVATE标志的值为0x0002），其他修饰符为假。代表字段名称的name_index的值为0x0005，从代码清单列出的常量表中可查得第五项常量是一个CONSTANT_Utf8_info类型的字符串，其值为“m”，代表字段描述符的descriptor_index的值为0x0006，指向常量池的字符串“I”。根据这些信息，我们可以推断出原代码定义的字段为“privateintm；”。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205041100456.png" style="zoom:67%;" /></figure>
+
+<p>​		字段表所包含的固定数据项目到descriptor_index为止就全部结束了，不过在descrip-tor_index之后跟随着一个属性表集合，用于存储一些额外的信息，字段表可以在属性表中附加描述零至多项的额外信息。对于本例中的字段m，它的属性表计数器为0，也就是没有需要额外描述的信息，但是，如果将字段m的声明改为“finalstaticintm&#x3D;123；”，那就可能会存在一项名称为ConstantValue的属性，其值指向常量123。</p>
+<p>​		字段表集合中不会列出从父类或者父接口中继承而来的字段，但有可能出现原本Java代码之中不存在的字段，譬如在内部类中为了保持对外部类的访问性，编译器就会自动添加指向外部类实例的字段。另外，<strong>在Java语言中字段是无法重载的</strong>，两个字段的数据类型、修饰符不管是否相同，都必须使用不一样的名称，但是对于Class文件格式来讲，只要两个字段的描述符不是完全相同，那字段重名就是合法的。</p>
+<h3 id="5-3-6-方法表集合"><a href="#5-3-6-方法表集合" class="headerlink" title="5.3.6 方法表集合"></a>5.3.6 方法表集合</h3><p>​		如果理解了上一节关于字段表的内容，那本节关于方法表的内容将会变得很简单。Class文件存储格式中对方法的描述与对字段的描述采用了几乎完全一致的方式，方法表的结构如同字段表一样，依次包括访问标志（access_flags）、名称索引（name_index）、描述符索引（descriptor_index）、属性表集合（attributes）几项，如表所示。这些数据项目的含义也与字段表中的非常类似，仅在访问标志和属性表集合的可选项中有所区别。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205041107787.png" style="zoom:67%;" /></figure>
+
+<p>​		因为<strong>volatile关键字和transient关键字不能修饰方法</strong>，所以方法表的访问标志中没有了ACC_VOLATILE标志和ACC_TRANSIENT标志。与之相对，synchronized、native、strictfp和abstract关键字可以修饰方法，方法表的访问标志中也相应地增加了ACC_SYNCHRONIZED、ACC_NATIVE、ACC_STRICTFP和ACC_ABSTRACT标志。对于方法表，所有标志位及其取值可参见表。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205041109018.png" style="zoom:67%;" /></figure>
+
+<p>​		行文至此，也许有的读者会产生疑问，方法的定义可以通过访问标志、名称索引、描述符索引来表达清楚，但方法里面的代码去哪里了？方法里的Java代码，经过Javac编译器编译成字节码指令之后，存放在方法属性表集合中一个名为“Code”的属性里面，属性表作为Class文件格式中最具扩展性的一种数据项目，将在下一节中详细讲解。</p>
+<p>​		我们继续以代码清单中的Class文件为例对方法表集合进行分析。如图所示，方法表集合的入口地址为0x00000101，第一个u2类型的数据（即计数器容量）的值为0x0002，代表集合中有两个方法，这两个方法为编译器添加的实例构造器和源码中定义的方法inc()。第一个方法的访问标志值为0x0001，也就是只有ACC_PUBLIC标志为真，名称索引值为0x0007，查代码清单6-2的常量池得方法名为“”，描述符索引值为0x0008，对应常量为“()V”，属性表计数器attributes_count的值为0x0001，表示此方法的属性表集合有1项属性，属性名称的索引值为0x0009，对应常量为“Code”，说明此属性是方法的字节码描述。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205041111253.png" style="zoom:67%;" /></figure>
+
+<p>​		与字段表集合相对应地，如果父类方法在子类中没有被重写（Override），方法表集合中就不会出现来自父类的方法信息。但同样地，有可能会出现由编译器自动添加的方法，最常见的便是类构造器“()”方法和实例构造器“()”方法。</p>
+<p>​        在Java语言中，要重载（Overload）一个方法，除了要与原方法具有相同的简单名称之外，还要求必须拥有一个与原方法不同的特征签名。特征签名是指一个方法中各个参数在常量池中的字段符号引用的集合，也正是因为返回值不会包含在特征签名之中，所以Java语言里面是无法仅仅依靠返回值的不同来对一个已有方法进行重载的。但是在Class文件格式之中，特征签名的范围明显要更大一些，只要描述符不是完全一致的两个方法就可以共存。也就是说，如果两个方法有相同的名称和特征签名，但返回值不同，那么也是可以合法共存于同一个Class文件中的。</p>
 
 	
 
