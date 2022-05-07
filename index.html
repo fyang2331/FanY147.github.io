@@ -29,6 +29,45 @@
 
 	<article>
 	
+		<h1><a href="/2022/05/07/JAVA知识点/">JAVA知识点</a></h1>
+	
+	<div class="article__infos">
+		<span class="article__date">2022-05-07</span><br />
+		
+		
+			<span class="article__tags">
+			  	<a class="article__tag-none-link" href="/tags/JAVA/" rel="tag">JAVA</a> <a class="article__tag-none-link" href="/tags/Learning/" rel="tag">Learning</a>
+			</span>
+		
+	</div>
+
+	
+
+	
+		<h4 id="方法重写的规则"><a href="#方法重写的规则" class="headerlink" title="方法重写的规则"></a>方法重写的规则</h4><ul>
+<li>方法名相同</li>
+<li>参数列表相同（数量，顺序，数据类型）</li>
+<li>如果被重写的方法的返回值是void，重写的方法的返回值必须也是void；如果被重写的方法的返回值是基本数据类型，重写方法的返回值也必须是相同的基本数据类型；返回的类型如果是引用类型，重写的方法的返回值必须和被重写的返回值类型相同，或者是被重写方法返回值类型的子类。</li>
+<li>子类重写的方法不能缩小父类被重写方法的访问权限，子类重写方法的访问权限必须大于等于父类被重写方法的访问权限。</li>
+<li>重写对privae无效。</li>
+<li>如果方法签名相同，父类和子类的方法必须同时为静态或者非静态。</li>
+<li>不能抛出比父类更多的异常</li>
+<li>final方法不能被子类重写</li>
+</ul>
+<h4 id="父类静态方法能否被重写？"><a href="#父类静态方法能否被重写？" class="headerlink" title="父类静态方法能否被重写？"></a>父类静态方法能否被重写？</h4><p>父类的普通方法可以被继承和<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E9%87%8D%E5%86%99&spm=1001.2101.3001.7020">重写</a>，不多作解释，如果子类继承父类，而且子类没有重写父类的方法，但是子类会有从父类继承过来的方法。</p>
+<p><strong>静态的方法可以被继承，但是不能重写</strong>。如果父类中有一个静态的方法，子类也有一个与其方法名，参数类型，参数个数都一样的方法，并且也有static关键字修饰，那么该子类的方法会把原来继承过来的父类的方法隐藏，而不是重写。通俗的讲就是父类的方法和子类的方法是两个没有关系的方法，具体调用哪一个方法是看是哪个对象的引用；这种父子类方法也不在存在多态的性质。《Java编程思想》中这样提到“<strong>只有普通的方法调用可以是多态的</strong>”。<strong>成员变量和静态方法不具有多态性</strong>。</p>
+
+	
+
+	
+
+</article>
+
+
+
+
+	<article>
+	
 		<h1><a href="/2022/05/05/MySQL基础/">MySQL基础</a></h1>
 	
 	<div class="article__infos">
@@ -281,43 +320,6 @@
 
 	
 		
-	
-
-	
-
-</article>
-
-
-
-
-	<article>
-	
-		<h1><a href="/2022/05/03/JVM-自动内存管理机制/">JVM-自动内存管理机制</a></h1>
-	
-	<div class="article__infos">
-		<span class="article__date">2022-05-03</span><br />
-		
-			<span class="article__category">
-				<a class="article-category-link" href="/categories/Learning/">Learning</a> > <a class="article-category-link" href="/categories/Learning/JVM/">JVM</a>
-			</span><br />
-		
-		
-			<span class="article__tags">
-			  	<a class="article__tag-none-link" href="/tags/JAVA/" rel="tag">JAVA</a> <a class="article__tag-none-link" href="/tags/JVM/" rel="tag">JVM</a> <a class="article__tag-none-link" href="/tags/Learning/" rel="tag">Learning</a>
-			</span>
-		
-	</div>
-
-	
-
-	
-		<blockquote>
-<p>就算我们站在群山之颠，也别忘记雄鹰依旧能从我们头顶飞过。</p>
-</blockquote>
-<img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205041035121.jpg"  />
-
-<h1 id="一、JAVA内存区域与内存溢出异常"><a href="#一、JAVA内存区域与内存溢出异常" class="headerlink" title="一、JAVA内存区域与内存溢出异常"></a>一、JAVA内存区域与内存溢出异常</h1><h2 id="1-1概述"><a href="#1-1概述" class="headerlink" title="1.1概述"></a>1.1概述</h2><p>​		对于JAVA程序员来说，在虚拟机自动内存管理机制的帮助下，不再需要为每一个new操作去写配对的delete&#x2F;free代码，不容易出现内存泄露和内存溢出问题，由虚拟机管理内存让一切都看起来很美好。不过，也正是因为JAVA程序员把内存控制的权利交给了JAVA虚拟机，一旦出现内存泄漏和溢出方面的问题，如果不了解虚拟机是怎样使用内存的，那么排查错误将成为一项异常艰难的工作。</p>
-		<p><a class="article__read-more-link" href="/2022/05/03/JVM-自动内存管理机制/">...read more</a></p>
 	
 
 	
