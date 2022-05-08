@@ -64,7 +64,15 @@
 </ol>
 <p>不同点：</p>
 <p>1. </p>
-<h4 id="抽象类和接口的异同"><a href="#抽象类和接口的异同" class="headerlink" title="抽象类和接口的异同"></a>抽象类和接口的异同</h4>
+<h4 id="抽象类和接口的异同"><a href="#抽象类和接口的异同" class="headerlink" title="抽象类和接口的异同"></a>抽象类和接口的异同</h4><h4 id="Static关键字"><a href="#Static关键字" class="headerlink" title="Static关键字"></a>Static关键字</h4><ul>
+<li>静态方法只能访问静态成员</li>
+<li>非静态方法可以访问所有成员</li>
+<li>访问时要遵守相关访问权限</li>
+<li>首先肯定:<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F&spm=1001.2101.3001.7020">静态变量</a>是被对象共享的</li>
+<li>jdk8之前：放在方法区</li>
+<li>jdk8及以后：存放在堆中反射的class对象（即<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E7%B1%BB%E5%8A%A0%E8%BD%BD&spm=1001.2101.3001.7020">类加载</a>后会在堆中生成一个对应的class对象）的尾部</li>
+</ul>
+
 	
 
 	
