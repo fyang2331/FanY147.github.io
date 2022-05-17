@@ -47,15 +47,15 @@
 
 <h2 id="1-1-何为上下文切换"><a href="#1-1-何为上下文切换" class="headerlink" title="1.1 何为上下文切换"></a>1.1 何为上下文切换</h2><p><strong>CPU通过时间片分配算法来循环执行任务，当前任务执行一个时间片后会切换到下一个任务。但是，在切换前会保存上一个任务的状态，以便下次切换回这个任务时，可以再加载这个任务的状态。所以任务从保存到再加载的过程就是一次上下文切换。</strong></p>
 <p>这就像我们同时读两本书，当我们在读一本英文的技术书时，发现某个单词不认识，于是便打开中英文字典，但是在放下英文技术书之前，大脑必须先记住这本书读到了多少页的第多少行，等查完单词之后，能够继续读这本书。这样的切换是会影响读书效率的，同样上下文切换也会影响多线程的执行速度。</p>
-<h4 id="某些情况下并发比串行执行慢的原因"><a href="#某些情况下并发比串行执行慢的原因" class="headerlink" title="某些情况下并发比串行执行慢的原因"></a>某些情况下并发比串行执行慢的原因</h4><p>因为线程有创建和上下文切换的开销。</p>
-<h4 id="如何减少上下文切换"><a href="#如何减少上下文切换" class="headerlink" title="如何减少上下文切换"></a>如何减少上下文切换</h4><ul>
+<h4 id="1-1-1某些情况下并发比串行执行慢的原因"><a href="#1-1-1某些情况下并发比串行执行慢的原因" class="headerlink" title="1.1.1某些情况下并发比串行执行慢的原因"></a>1.1.1某些情况下并发比串行执行慢的原因</h4><p>因为线程有创建和上下文切换的开销。</p>
+<h4 id="1-1-1如何减少上下文切换"><a href="#1-1-1如何减少上下文切换" class="headerlink" title="1.1.1如何减少上下文切换"></a>1.1.1如何减少上下文切换</h4><ul>
 <li>减少上下文切换的方法有无锁并发编程、CAS算法、使用最少线程和使用协程。 </li>
 <li>无锁并发编程。多线程竞争锁时，会引起上下文切换，所以多线程处理数据时，可以用一 些办法来避免使用锁，如将数据的ID按照Hash算法取模分段，不同的线程处理不同段的数据。</li>
 <li>CAS算法。Java的Atomic包使用CAS算法来更新数据，而不需要加锁。</li>
 <li>使用最少线程。避免创建不需要的线程，比如任务很少，但是创建了很多线程来处理，这 样会造成大量线程都处于等待状态。 </li>
 <li>协程：在单线程里实现多任务的调度，并在单线程里维持多个任务间的切换。</li>
 </ul>
-<h4 id="避免死锁的几个常见方法。"><a href="#避免死锁的几个常见方法。" class="headerlink" title="避免死锁的几个常见方法。"></a>避免死锁的几个常见方法。</h4><ul>
+<h2 id="1-2避免死锁的几个常见方法。"><a href="#1-2避免死锁的几个常见方法。" class="headerlink" title="1.2避免死锁的几个常见方法。"></a>1.2避免死锁的几个常见方法。</h2><ul>
 <li>避免一个线程同时获取多个锁。</li>
 <li>避免一个线程在锁内同时占用多个资源，尽量保证每个锁只占用一个资源。</li>
 <li>尝试使用定时锁，使用lock.tryLock（timeout）来替代使用内部锁机制。</li>
@@ -165,6 +165,27 @@
 <p>注意两个操作之间具有happens-before关系，并不意味着前一个操作必须要在后一个操作之前执行！happens-before仅仅要求前一个操作（执行的结果）对后一个操作可见，且前一个操作按顺序排在第二个操作之前（thefirstisvisibletoandorderedbeforethesecond）。happens-before的定义很微妙，后文会具体说明happens-before为什么要这么定义。</p>
 <p>happens-before与JMM的关系如图所示。</p>
 <figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205172127286.png" style="zoom:80%;" /></figure>
+
+<p>一个happens-before规则对应于一个或多个编译器和处理器重排序规则。对于Java程序员来说，happens-before规则简单易懂，它避免Java程序员为了理解JMM提供的内存可见性保证而去学习复杂的重排序规则以及这些规则的具体实现方法。</p>
+<h2 id="3-2-重排序"><a href="#3-2-重排序" class="headerlink" title="3.2 重排序"></a>3.2 重排序</h2><blockquote>
+<p>重排序是指编译器和处理器为了优化程序性能而对指令序列进行重新排序的一种手段。</p>
+</blockquote>
+<h3 id="3-2-1-数据依赖性"><a href="#3-2-1-数据依赖性" class="headerlink" title="3.2.1 数据依赖性"></a>3.2.1 数据依赖性</h3><p>如果两个操作访问同一个变量，且这两个操作中有一个为写操作，此时这两个操作之间就存在数据依赖性。数据依赖分为下列3种类型，如表所示。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205172131952.png" style="zoom:80%;" /></figure>
+
+<p>只要重排序两个操作的执行顺序，程序的执行结果就会被改变。</p>
+<p>前面提到过，编译器和处理器可能会对操作做重排序。编译器和处理器在重排序时，会遵守数据依赖性，编译器和处理器不会改变存在数据依赖关系的两个操作的执行顺序。</p>
+<p>这里所说的数据依赖性仅针对单个处理器中执行的指令序列和单个线程中执行的操作，不同处理器之间和不同线程之间的数据依赖性不被编译器和处理器考虑。</p>
+<h3 id="3-2-2-as-if-serial语义"><a href="#3-2-2-as-if-serial语义" class="headerlink" title="3.2.2 as-if-serial语义"></a>3.2.2 as-if-serial语义</h3><p>as-if-serial语义的意思是：不管怎么重排序（编译器和处理器为了提高并行度），（单线程）程序的执行结果不能被改变。编译器、runtime和处理器都必须遵守as-if-serial语义。</p>
+<p>为了遵守as-if-serial语义，编译器和处理器不会对存在数据依赖关系的操作做重排序，因为这种重排序会改变执行结果。但是，如果操作之间不存在数据依赖关系，这些操作就可能被编译器和处理器重排序。为了具体说明，请看下面计算圆面积的代码示例。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">double</span> <span class="variable">pi</span> <span class="operator">=</span> <span class="number">3.14</span>; <span class="comment">// A</span></span><br><span class="line"><span class="type">double</span> <span class="variable">r</span> <span class="operator">=</span> <span class="number">1.0</span>; <span class="comment">// B</span></span><br><span class="line"><span class="type">double</span> <span class="variable">area</span> <span class="operator">=</span> pi * r * r; <span class="comment">// C</span></span><br></pre></td></tr></table></figure>
+
+<p>上面3个操作的数据依赖关系如图所示。</p>
+<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205172137441.png"></figure></p>
+<p>如上图所示，A和C之间存在数据依赖关系，同时B和C之间也存在数据依赖关系。因此在最终执行的指令序列中，C不能被重排序到A和B的前面（C排到A和B的前面，程序的结果将会被改变）。但A和B之间没有数据依赖关系，编译器和处理器可以重排序A和B之间的执行顺序。下图是该程序的两种执行顺序。</p>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202205172138646.png" style="zoom:80%;" /></figure>
+
+<p>as-if-serial语义把单线程程序保护了起来，遵守as-if-serial语义的编译器、runtime和处理器共同为编写单线程程序的程序员创建了一个幻觉：单线程程序是按程序的顺序来执行的。as-if-serial语义使单线程程序员无需担心重排序会干扰他们，也无需担心内存可见性问题。</p>
 
 	
 
