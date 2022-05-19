@@ -115,7 +115,30 @@
 	
 
 	
-		
+		<h1 id="一、-基本操作"><a href="#一、-基本操作" class="headerlink" title="一、 基本操作"></a>一、 基本操作</h1><h2 id="1、-创建数据库和表"><a href="#1、-创建数据库和表" class="headerlink" title="1、 创建数据库和表"></a>1、 创建数据库和表</h2><p>创建数据库语句</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> DATABASE database;</span><br></pre></td></tr></table></figure>
+
+<p>展示所有数据库</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> DATABASES;</span><br></pre></td></tr></table></figure>
+
+<p>使用指定数据库</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">USE database;</span><br></pre></td></tr></table></figure>
+
+<p>创建表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> student(</span><br><span class="line">    s_no <span class="type">VARCHAR</span>(<span class="number">20</span>) <span class="keyword">PRIMARY</span> KEY COMMENT<span class="string">&#x27;学生学号&#x27;</span>,</span><br><span class="line">    s_name <span class="type">VARCHAR</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT<span class="string">&#x27;学生姓名 不能为空&#x27;</span>,</span><br><span class="line">    s_sex <span class="type">VARCHAR</span>(<span class="number">10</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT<span class="string">&#x27;学生性别&#x27;</span>,</span><br><span class="line">    s_birthday DATETIME COMMENT<span class="string">&#x27;学生生日&#x27;</span>,</span><br><span class="line">    s_class <span class="type">VARCHAR</span>(<span class="number">20</span>) COMMENT<span class="string">&#x27;学生所在的班级&#x27;</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>展示表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DESCRIBE</span> <span class="keyword">table</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2、对表的操作"><a href="#2、对表的操作" class="headerlink" title="2、对表的操作"></a>2、对表的操作</h2><h3 id="查看表中的记录"><a href="#查看表中的记录" class="headerlink" title="查看表中的记录"></a>查看表中的记录</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span><span class="keyword">FROM</span> <span class="keyword">table</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="插入操作"><a href="#插入操作" class="headerlink" title="插入操作"></a>插入操作</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">table</span> <span class="keyword">VALUES</span> (<span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>...);</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除操作"><a href="#删除操作" class="headerlink" title="删除操作"></a>删除操作</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> cow <span class="operator">=</span> <span class="string">&#x27;&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> <span class="keyword">table</span> <span class="keyword">SET</span> cow1 <span class="operator">=</span> <span class="string">&#x27;&#x27;</span> <span class="keyword">WHERE</span> cow2 <span class="operator">=</span> <span class="string">&#x27;&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+
 	
 
 	
