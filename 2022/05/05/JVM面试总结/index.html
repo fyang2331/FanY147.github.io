@@ -36,7 +36,7 @@
 		
 		
 			<span class="article__tags">
-			  	<a class="article__tag-none-link" href="/tags/JAVA/" rel="tag">JAVA</a> <a class="article__tag-none-link" href="/tags/JVM/" rel="tag">JVM</a> <a class="article__tag-none-link" href="/tags/Learning/" rel="tag">Learning</a> <a class="article__tag-none-link" href="/tags/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" rel="tag">面试总结</a>
+			  	<a class="article__tag-none-link" href="/tags/JAVA/" rel="tag">JAVA</a> <a class="article__tag-none-link" href="/tags/JVM/" rel="tag">JVM</a> <a class="article__tag-none-link" href="/tags/Learning/" rel="tag">Learning</a> <a class="article__tag-none-link" href="/tags/%E9%9D%A2%E8%AF%95%E6%80%BB/" rel="tag">面试总</a>
 			</span>
 		
 	</div>
@@ -44,7 +44,16 @@
 	
 
 	
-		
+		<h2 id="linux系统中解决JVM堆溢出"><a href="#linux系统中解决JVM堆溢出" class="headerlink" title="linux系统中解决JVM堆溢出"></a>linux系统中解决JVM堆溢出</h2><p>JVM出现内存溢出后，会自动生成快照，然后分析堆内存快照：</p>
+<ol>
+<li>使用XFTP等工具将服务器中的快照文件导出，本文堆内存快照文件是以 hprof 为后缀的文件；导出快照文件后，可以通过JDK自带的 jvisualvm.exe 分析工具打开进行分析。</li>
+<li>使用 jvisualvm.exe 导入快照文件。</li>
+<li>可以发现堆内存中有一个实例对象的占比情况，确定是由于哪个对象大量创建导致堆内存的溢出。</li>
+</ol>
+<figure class="figure"><img src="C:/Users/d1216/AppData/Roaming/Typora/typora-user-images/image-20220519202404585.png" alt="image-20220519202404585" style="zoom: 67%;" /><figcaption class="figure__caption">image-20220519202404585</figcaption></figure>
+
+<p>由于项目中定位格网的数据是用的String类型的字符串，所以创建的对象即char类型的数组，在每个格网定位结束后并未进行及时的垃圾回收，随着格网剖分的粒度越大，格网数量越来越多，字符串数组最终越来越大，导致堆溢出发生。</p>
+
 	
 
 	
