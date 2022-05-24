@@ -162,7 +162,15 @@
 
 <h3 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> <span class="keyword">table</span> <span class="keyword">SET</span> cow1 <span class="operator">=</span> <span class="string">&#x27;&#x27;</span> <span class="keyword">WHERE</span> cow2 <span class="operator">=</span> <span class="string">&#x27;&#x27;</span>;</span><br></pre></td></tr></table></figure>
 
-<h1 id="二、约束"><a href="#二、约束" class="headerlink" title="二、约束"></a>二、约束</h1>
+<h1 id="二、约束"><a href="#二、约束" class="headerlink" title="二、约束"></a>二、约束</h1><h2 id="1、主键"><a href="#1、主键" class="headerlink" title="1、主键"></a>1、主键</h2><p>能够唯一确定表中的一条记录。我们通过给某个字段添加该约束，就可以使得该字段不重复且不为空。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE user (</span><br><span class="line">	id INT PRIMARY KEY,</span><br><span class="line">	name VARCHAR(20)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="联合主键"><a href="#联合主键" class="headerlink" title="联合主键"></a>联合主键</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE user2 (</span><br><span class="line">	id INT,</span><br><span class="line">	name VARCHAR(20),</span><br><span class="line">    PRIMARY KEY(id, name)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>此处字段id和name一同作为主键，联合主键要求每个字段<strong>加起来不同即可</strong>（无需每个字段都不同）</p>
+<h3 id="建表后添加主键"><a href="#建表后添加主键" class="headerlink" title="建表后添加主键"></a>建表后添加主键</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALERT TABLE user2 ADD PRIMARY KEY (id);</span><br></pre></td></tr></table></figure>
+
+
 	
 
 	
@@ -340,10 +348,15 @@
 	
 
 	
-		<h1 id="虚拟化"><a href="#虚拟化" class="headerlink" title="虚拟化"></a>虚拟化</h1><h2 id="一、-抽象：进程"><a href="#一、-抽象：进程" class="headerlink" title="一、 抽象：进程"></a>一、 抽象：进程</h2><h3 id="1-1-抽象：进程"><a href="#1-1-抽象：进程" class="headerlink" title="1.1 抽象：进程"></a>1.1 抽象：进程</h3><p>操作系统为正在运行的程序提供的抽象叫做进程，一个进程只是一个正在运行的程序。构成进程的是机器状态，机器状态：程序正在运行时可以读取或更新的内容。</p>
-<p>进程的机器状态的一个组成部分是他的内存。指令存在内存中。正在运行的程序读取和写入的数据也在内存中。因此进程可以访问的内存（称为地址空间）是该进程的一部分。</p>
-<p>进程的机器状态的另一部分是寄存器。许多指令明确的读取或更新寄存器，例如：程序计数器、栈指针和相关的帧指针用于管理函数参数站、局部变量和返回地址。</p>
-<h3 id="1-2-进程API"><a href="#1-2-进程API" class="headerlink" title="1.2 进程API"></a>1.2 进程API</h3>
+		<figure class="figure"><img src="../../public/img/os.png" style="zoom: 67%;" /></figure>
+
+<h2 id="操作系统介绍"><a href="#操作系统介绍" class="headerlink" title="操作系统介绍"></a>操作系统介绍</h2><p>一个正在运行的程序会做：取址执行。从内存中获取指令，对其解码，执行。</p>
+<p>操作系统主要利用一种通用的技术，我们称之为虚拟化(virtualization)。 也就是说，操作系统将物理(physical)资源(如处理器、内存或磁盘)转换为更通用、更强大且更易于使用的虚拟形式。</p>
+<p>操作系统取得CPU，内存和磁盘等物理资源，并对它们进行虚拟化；处理与并发相关的麻烦事；持久化地存储文件，使文件长期安全。</p>
+<h2 id="虚拟化"><a href="#虚拟化" class="headerlink" title="虚拟化"></a>虚拟化</h2><h3 id="4-抽象-进程"><a href="#4-抽象-进程" class="headerlink" title="4.抽象 进程"></a>4.抽象 进程</h3><p>进程可以被简单地视为正在运行的程序。</p>
+<p>进程的创建首先将代码和静态数据加载到内存中，创建和初始化栈，执行I&#x2F;O设置相关的其他工作，操作系统就为程序的执行搭建好了舞台，最后需要启动程序。</p>
+<p>一般来说进程可以在三个状态：运行，就绪，阻塞。</p>
+
 	
 
 	

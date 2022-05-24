@@ -67,7 +67,15 @@
 
 <h3 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> <span class="keyword">table</span> <span class="keyword">SET</span> cow1 <span class="operator">=</span> <span class="string">&#x27;&#x27;</span> <span class="keyword">WHERE</span> cow2 <span class="operator">=</span> <span class="string">&#x27;&#x27;</span>;</span><br></pre></td></tr></table></figure>
 
-<h1 id="二、约束"><a href="#二、约束" class="headerlink" title="二、约束"></a>二、约束</h1>
+<h1 id="二、约束"><a href="#二、约束" class="headerlink" title="二、约束"></a>二、约束</h1><h2 id="1、主键"><a href="#1、主键" class="headerlink" title="1、主键"></a>1、主键</h2><p>能够唯一确定表中的一条记录。我们通过给某个字段添加该约束，就可以使得该字段不重复且不为空。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE user (</span><br><span class="line">	id INT PRIMARY KEY,</span><br><span class="line">	name VARCHAR(20)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="联合主键"><a href="#联合主键" class="headerlink" title="联合主键"></a>联合主键</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE user2 (</span><br><span class="line">	id INT,</span><br><span class="line">	name VARCHAR(20),</span><br><span class="line">    PRIMARY KEY(id, name)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>此处字段id和name一同作为主键，联合主键要求每个字段<strong>加起来不同即可</strong>（无需每个字段都不同）</p>
+<h3 id="建表后添加主键"><a href="#建表后添加主键" class="headerlink" title="建表后添加主键"></a>建表后添加主键</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALERT TABLE user2 ADD PRIMARY KEY (id);</span><br></pre></td></tr></table></figure>
+
+
 	
 
 	
