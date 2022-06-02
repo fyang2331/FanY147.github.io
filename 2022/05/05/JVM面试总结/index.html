@@ -45,6 +45,8 @@
 
 	
 		<h2 id="linux系统中解决JVM堆溢出"><a href="#linux系统中解决JVM堆溢出" class="headerlink" title="linux系统中解决JVM堆溢出"></a>linux系统中解决JVM堆溢出</h2><p>JVM出现内存溢出后，会自动生成快照，然后分析堆内存快照：</p>
+<span id="more"></span>
+
 <ol>
 <li>使用XFTP等工具将服务器中的快照文件导出，本文堆内存快照文件是以 hprof 为后缀的文件；导出快照文件后，可以通过JDK自带的 jvisualvm.exe 分析工具打开进行分析。</li>
 <li>使用 jvisualvm.exe 导入快照文件。</li>

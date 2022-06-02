@@ -40,7 +40,8 @@
 	
 
 	
-		
+		<span id="more"></span>
+
 	
 
 	
@@ -164,36 +165,7 @@
 	
 		<h1 id="一、-基本操作"><a href="#一、-基本操作" class="headerlink" title="一、 基本操作"></a>一、 基本操作</h1><h2 id="1、-创建数据库和表"><a href="#1、-创建数据库和表" class="headerlink" title="1、 创建数据库和表"></a>1、 创建数据库和表</h2><p>创建数据库语句</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> DATABASE database;</span><br></pre></td></tr></table></figure>
-
-<p>展示所有数据库</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> DATABASES;</span><br></pre></td></tr></table></figure>
-
-<p>使用指定数据库</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">USE database;</span><br></pre></td></tr></table></figure>
-
-<p>创建表</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> student(</span><br><span class="line">    s_no <span class="type">VARCHAR</span>(<span class="number">20</span>) <span class="keyword">PRIMARY</span> KEY COMMENT<span class="string">&#x27;学生学号&#x27;</span>,</span><br><span class="line">    s_name <span class="type">VARCHAR</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT<span class="string">&#x27;学生姓名 不能为空&#x27;</span>,</span><br><span class="line">    s_sex <span class="type">VARCHAR</span>(<span class="number">10</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT<span class="string">&#x27;学生性别&#x27;</span>,</span><br><span class="line">    s_birthday DATETIME COMMENT<span class="string">&#x27;学生生日&#x27;</span>,</span><br><span class="line">    s_class <span class="type">VARCHAR</span>(<span class="number">20</span>) COMMENT<span class="string">&#x27;学生所在的班级&#x27;</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
-
-<p>展示表</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DESCRIBE</span> <span class="keyword">table</span>;</span><br></pre></td></tr></table></figure>
-
-<h2 id="2、对表的操作"><a href="#2、对表的操作" class="headerlink" title="2、对表的操作"></a>2、对表的操作</h2><h3 id="查看表中的记录"><a href="#查看表中的记录" class="headerlink" title="查看表中的记录"></a>查看表中的记录</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span><span class="keyword">FROM</span> <span class="keyword">table</span>;</span><br></pre></td></tr></table></figure>
-
-<h3 id="插入操作"><a href="#插入操作" class="headerlink" title="插入操作"></a>插入操作</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">table</span> <span class="keyword">VALUES</span> (<span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>...);</span><br></pre></td></tr></table></figure>
-
-<h3 id="删除操作"><a href="#删除操作" class="headerlink" title="删除操作"></a>删除操作</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> cow <span class="operator">=</span> <span class="string">&#x27;&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h3 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> <span class="keyword">table</span> <span class="keyword">SET</span> cow1 <span class="operator">=</span> <span class="string">&#x27;&#x27;</span> <span class="keyword">WHERE</span> cow2 <span class="operator">=</span> <span class="string">&#x27;&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="二、约束"><a href="#二、约束" class="headerlink" title="二、约束"></a>二、约束</h1><h2 id="1、主键"><a href="#1、主键" class="headerlink" title="1、主键"></a>1、主键</h2><p>能够唯一确定表中的一条记录。我们通过给某个字段添加该约束，就可以使得该字段不重复且不为空。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE user (</span><br><span class="line">	id INT PRIMARY KEY,</span><br><span class="line">	name VARCHAR(20)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
-
-<h3 id="联合主键"><a href="#联合主键" class="headerlink" title="联合主键"></a>联合主键</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE user2 (</span><br><span class="line">	id INT,</span><br><span class="line">	name VARCHAR(20),</span><br><span class="line">    PRIMARY KEY(id, name)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
-
-<p>此处字段id和name一同作为主键，联合主键要求每个字段<strong>加起来不同即可</strong>（无需每个字段都不同）</p>
-<h3 id="建表后添加主键"><a href="#建表后添加主键" class="headerlink" title="建表后添加主键"></a>建表后添加主键</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALERT TABLE user2 ADD PRIMARY KEY (id);</span><br></pre></td></tr></table></figure>
-
-
+		<p><a class="article__read-more-link" href="/2022/05/05/MySQL基础/">...read more</a></p>
 	
 
 	
@@ -224,7 +196,8 @@
 	
 
 	
-		
+		<span id="more"></span>
+
 	
 
 	
@@ -256,11 +229,7 @@
 
 	
 		<h3 id="重定向（Redirect）："><a href="#重定向（Redirect）：" class="headerlink" title="重定向（Redirect）："></a>重定向（Redirect）：</h3><p>客户端浏览器向Web应用服务器端发送一个请求，Web服务器端使用HttpServletResponse的sendRedirect()方法将结果（结果中头信息内HTTP状态码为302，Location响应报头域中保存响应回来的地址）返回客户端浏览器；客户端浏览器收到服务器端结果后解析其头部信息，然后自动按照头部指定地址以GET方式再次向Web应用服务器端发请求，<strong>此时地址栏URL发生变化</strong>，<strong>服务器端接收到新的请求再将结果返回至客户端浏览器，客户端浏览器解释执行返回结果并将执行结果显示给用户，至此该过程结束。</strong></p>
-<p>请求转发（Forward）：<br>这里的“请求”是名词，请求转发指客户端浏览器向Web服务器端发送请求，服务器端收到请求后进行相应处理后再将该请求转发到另外的资源（<strong>即这一“转发”操作是在Web服务器端执行的</strong>），服务器端对该资源进行处理后反馈给客户端。</p>
-<p>区别：<br>            1、<strong>重定向：当客户端向服务器发送一个请求，请求地址发生了变化，服务器向客户端返回了一个继续处理的新地址，此时客户端自动（不需要人工参与）访问服务器的新地址，服务器将新地址的内容返回给客户端。采用重定向的方式进行处理，客户端和服务器端共执行了两次请求和两次响应，且浏览器地址栏显示的是第二次访问的新地址。(request对象改变)</strong><br>               请求转发:  当客户端向服务器端发送一个请求，请求地址没有发生变化，服务器调用内部的方法直接将请求转发给新地址进行处理，然后将处理结果反馈给客户端。采用请求转发的方式，客户端和服务器端只执行了一次请求和一次响应，且浏览器地址栏显示的是第一次访问的原地址 (r<strong>equest对象不变</strong>)<br>            2、请求转发方式处理页面跳转，跳转的新地址必须是本Web应用系统的资源，不可以访问其他Web应用的资源，而重定向没有这个限制。<br>            3、重定向无法再新的页面获取request.setAttribute中保存的数据，请求转发可以。<br>            4、Web项目中WEB-INF文件夹是最安全的目录，该目录内的资源只能通过请求转发获取，重定向的方式无法获取。</p>
-<p><strong>项目中，手动重定向不通过MVC框架重定向，则需要在重定向地址栏中加上项目名称。</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">httpServletResponse.sendRedirect(httpServletRequest.getContextPath());<span class="comment">//重定向时，url必须加项目的名称</span></span><br></pre></td></tr></table></figure>
-
+		<p><a class="article__read-more-link" href="/2022/05/05/计算机网络（自顶向下方法）/">...read more</a></p>
 	
 
 	
@@ -291,7 +260,8 @@
 	
 
 	
-		
+		<span id="more"></span>
+
 	
 
 	
@@ -322,7 +292,8 @@
 	
 
 	
-		
+		<span id="more"></span>
+
 	
 
 	
