@@ -44,10 +44,7 @@
 	
 
 	
-		<h1 id="第一章"><a href="#第一章" class="headerlink" title="第一章"></a>第一章</h1><blockquote>
-<p>  第一章的主要内容是 : 操作系统的一些知识</p>
-</blockquote>
-<h3 id="操作系统是什么？"><a href="#操作系统是什么？" class="headerlink" title="操作系统是什么？"></a>操作系统是什么？</h3><p>用户角度：操作系统是一个控制软件</p>
+		<h1 id="第一章"><a href="#第一章" class="headerlink" title="第一章"></a>第一章</h1><h3 id="操作系统是什么？"><a href="#操作系统是什么？" class="headerlink" title="操作系统是什么？"></a>操作系统是什么？</h3><p>用户角度：操作系统是一个控制软件</p>
 <span id="more"></span>
 
 <ul>
@@ -94,10 +91,7 @@
 </ul>
 </li>
 </ul>
-<h1 id="第二章"><a href="#第二章" class="headerlink" title="第二章"></a>第二章</h1><blockquote>
-<p>  第二章的主要内容是 : 操作系统的异常&#x2F;中断&#x2F;系统调用</p>
-</blockquote>
-<h2 id="探究计算机启动过程"><a href="#探究计算机启动过程" class="headerlink" title="探究计算机启动过程"></a>探究计算机启动过程</h2><p><strong>作用解析</strong></p>
+<h1 id="第二章"><a href="#第二章" class="headerlink" title="第二章"></a>第二章</h1><h2 id="探究计算机启动过程"><a href="#探究计算机启动过程" class="headerlink" title="探究计算机启动过程"></a>探究计算机启动过程</h2><p><strong>作用解析</strong></p>
 <p>Disk : 存放OS和Bootloader</p>
 <p>BOIS : 基于I&#x2F;O处理系统</p>
 <p>Bootloader : 加载OS，将OS放入内存</p>
@@ -222,10 +216,7 @@
 <li>只有内核可以执行特权指令</li>
 <li>为了方便应用程序</li>
 </ul>
-<h1 id="第三章"><a href="#第三章" class="headerlink" title="第三章"></a>第三章</h1><blockquote>
-<p>  第三章的主要内容是 : 操作系统的物理内存管理</p>
-</blockquote>
-<h2 id="计算机体系结构"><a href="#计算机体系结构" class="headerlink" title="计算机体系结构"></a>计算机体系结构</h2><ol>
+<h1 id="第三章"><a href="#第三章" class="headerlink" title="第三章"></a>第三章</h1><h2 id="计算机体系结构"><a href="#计算机体系结构" class="headerlink" title="计算机体系结构"></a>计算机体系结构</h2><ol>
 <li>CPU</li>
 <li>内存</li>
 <li>I&#x2F;O</li>
@@ -341,10 +332,7 @@
 </ul>
 </li>
 </ol>
-<h1 id="第四章"><a href="#第四章" class="headerlink" title="第四章"></a>第四章</h1><blockquote>
-<p>  第四章的主要内容是：操作系统的非连续内存分配</p>
-</blockquote>
-<p>第三章介绍的是连续内存管理, 即 : 操作系统加载到内存以及程序加载到内存中时, 分配一块连续的空闲(内存)块. 但是容易出现碎片问题, 这一章介绍的非连续内存分配可以有效的减少碎片的出现.</p>
+<h1 id="第四章"><a href="#第四章" class="headerlink" title="第四章"></a>第四章</h1><p>第三章介绍的是连续内存管理, 即 : 操作系统加载到内存以及程序加载到内存中时, 分配一块连续的空闲(内存)块. 但是容易出现碎片问题, 这一章介绍的非连续内存分配可以有效的减少碎片的出现.</p>
 <h2 id="非连续内存分配的必要性"><a href="#非连续内存分配的必要性" class="headerlink" title="非连续内存分配的必要性"></a>非连续内存分配的必要性</h2><h3 id="连续内存分配的缺点"><a href="#连续内存分配的缺点" class="headerlink" title="连续内存分配的缺点"></a>连续内存分配的缺点</h3><ol>
 <li>分配给一个程序的物理内存是连续的</li>
 <li>内存利用率低</li>
@@ -373,7 +361,7 @@
 <h2 id="非连续内存分配"><a href="#非连续内存分配" class="headerlink" title="非连续内存分配"></a>非连续内存分配</h2><h3 id="分段-Segmentation"><a href="#分段-Segmentation" class="headerlink" title="分段(Segmentation)"></a>分段(Segmentation)</h3><p><strong>段 :</strong> 在程序中会有来自不同文件的函数 ; 在程序执行时, 不同的数据也有不同的字段, 比如 : 堆 &#x2F; 栈 &#x2F; .bss &#x2F; .data 等</p>
 <p>**分段 : ** 更好的分离和共享</p>
 <p>程序的分段地址空间如下图所示 : </p>
-<figure class="figure"><img src="https://camo.githubusercontent.com/9db208b68e844759210535e7ec1929186e60dae2153ac930d2e662a782ca7bd1/68747470733a2f2f692e6c6f6c692e6e65742f323032302f31312f31312f4e416e7a484b6a3574454d343136682e6a7067"/></figure>
+<figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202206051912339.png"/></figure>
 
 <p><strong>分段寻址方案</strong></p>
 <p>逻辑地址空间连续，但是物理地址空间不连续，使用映射机制进行关联.</p>
@@ -534,10 +522,7 @@
 </ul>
 </li>
 </ul>
-<h1 id="第五章"><a href="#第五章" class="headerlink" title="第五章"></a>第五章</h1><blockquote>
-<p>  第五章的主要内容是：操作系统的虚拟内存管理技术</p>
-</blockquote>
-<h2 id="虚拟内存的起因"><a href="#虚拟内存的起因" class="headerlink" title="虚拟内存的起因"></a>虚拟内存的起因</h2><p>使用硬盘&#x2F;磁盘使更多的程序在有限的内存中运行</p>
+<h1 id="第五章"><a href="#第五章" class="headerlink" title="第五章"></a>第五章</h1><h2 id="虚拟内存的起因"><a href="#虚拟内存的起因" class="headerlink" title="虚拟内存的起因"></a>虚拟内存的起因</h2><p>使用硬盘&#x2F;磁盘使更多的程序在有限的内存中运行</p>
 <p>理想的存储器 : 更大更快更便宜和非易失性的存储区</p>
 <h2 id="覆盖技术"><a href="#覆盖技术" class="headerlink" title="覆盖技术"></a>覆盖技术</h2><p>如果是程序太大, 超出了内存的容量, 可以采用手动的概率(overlay)技术, 只把需要的指令和数据保存在内存当中</p>
 <p>目的 : 是在较小的可用内存中运行较大的程序, 常用于多道程序系统, 与分区存储管理配合使用.</p>
@@ -669,10 +654,7 @@
 </ul>
 </li>
 </ul>
-<h1 id="第六章"><a href="#第六章" class="headerlink" title="第六章"></a>第六章</h1><blockquote>
-<p>  第六章的主要内容是：操作系统的虚拟内存管理技术中的页面置换算法</p>
-</blockquote>
-<h2 id="功能与目标"><a href="#功能与目标" class="headerlink" title="功能与目标"></a>功能与目标</h2><p>功能 : 当缺页中断发生, 需要调入新的页面而内存已满时, 选择内存当中哪个物理页面被置换.</p>
+<h1 id="第六章"><a href="#第六章" class="headerlink" title="第六章"></a>第六章</h1><h2 id="功能与目标"><a href="#功能与目标" class="headerlink" title="功能与目标"></a>功能与目标</h2><p>功能 : 当缺页中断发生, 需要调入新的页面而内存已满时, 选择内存当中哪个物理页面被置换.</p>
 <p>目标 : 尽可能地减少页面的换进换出次数(即缺页中断的次数). 具体来说, 把未来不再使用的或短期内较少使用的页面换出, 通常只能在局部性原理指导下依据过去的统计数据来进行预测.</p>
 <p>页面锁定 : 用于描述必须常驻内存的操作系统的关键部分或时间关键的应用进程. 实现的方式是 : 在页表中添加锁定标记位(lock bit).</p>
 <h2 id="实验设置与评价方法"><a href="#实验设置与评价方法" class="headerlink" title="实验设置与评价方法"></a>实验设置与评价方法</h2><p>实例 :</p>
@@ -758,10 +740,7 @@
 <li>如果分配给一个进程的物理页面太少, 不能包含整个的工作集, 即常驻集 属于 工作集, 那么进程将会造成很多的缺页中断, 需要频繁的在内存与外存之间替换页面, 从而使进程的运行速度变得很慢, 我们把这种状态称为 “抖动”.</li>
 <li>产生抖动的原因 : 随着驻留内存的进程数目增加, 分配给每个进程的物理页面数不断就减小, 缺页率不断上升. 所以OS要选择一个适当的进程数目和进程需要的帧数, 以便在并发水平和缺页率之间达到一个平衡.</li>
 </ul>
-<h1 id="第七章"><a href="#第七章" class="headerlink" title="第七章"></a>第七章</h1><blockquote>
-<p>  第七章的主要内容是：进程</p>
-</blockquote>
-<h2 id="进程-process-描述"><a href="#进程-process-描述" class="headerlink" title="进程(process)描述"></a>进程(process)描述</h2><h3 id="进程定义"><a href="#进程定义" class="headerlink" title="进程定义"></a>进程定义</h3><p>进程 : 一个具有一定独立功能的程序在一个数据集合上的一次动态执行过程.</p>
+<h1 id="第七章"><a href="#第七章" class="headerlink" title="第七章"></a>第七章</h1><h2 id="进程-process-描述"><a href="#进程-process-描述" class="headerlink" title="进程(process)描述"></a>进程(process)描述</h2><h3 id="进程定义"><a href="#进程定义" class="headerlink" title="进程定义"></a>进程定义</h3><p>进程 : 一个具有一定独立功能的程序在一个数据集合上的一次动态执行过程.</p>
 <h3 id="进程的组成"><a href="#进程的组成" class="headerlink" title="进程的组成"></a>进程的组成</h3><p>进程包括 :</p>
 <ul>
 <li>程序的代码</li>
@@ -824,6 +803,7 @@
 <li>用户请求创建一个新进程;</li>
 <li>正在运行的进程执行了创建进程的系统调用.</li>
 </ul>
+<p><figure class="figure"><img src="https://raw.githubusercontent.com/FanY147/imgsRepo/master/img/202206051917832.png"></figure></p>
 <h4 id="进程运行"><a href="#进程运行" class="headerlink" title="进程运行"></a>进程运行</h4><p>内核选择一个就绪的进程, 让它占用处理机并执行</p>
 <p>(为何选择?如何选择?)</p>
 <h4 id="进程等待-阻塞"><a href="#进程等待-阻塞" class="headerlink" title="进程等待(阻塞)"></a>进程等待(阻塞)</h4><p>在以下情况下, 进程等待(阻塞):</p>
@@ -1045,10 +1025,7 @@
 </li>
 <li>进程终止是最终的垃圾收集(资源回收)</li>
 </ul>
-<h1 id="第八章"><a href="#第八章" class="headerlink" title="第八章"></a>第八章</h1><blockquote>
-<p>  第八章的主要内容是：调度算法(感觉清华这门课程前几章比较精彩,后续讲的有点混乱)</p>
-</blockquote>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="上下文切换-1"><a href="#上下文切换-1" class="headerlink" title="上下文切换"></a>上下文切换</h3><ul>
+<h1 id="第八章"><a href="#第八章" class="headerlink" title="第八章"></a>第八章</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="上下文切换-1"><a href="#上下文切换-1" class="headerlink" title="上下文切换"></a>上下文切换</h3><ul>
 <li>切换CPU的当前任务, 从一个进程&#x2F;线程到另一个</li>
 <li>保存当前进程&#x2F;线程在PCB&#x2F;TCB中的执行上下文(CPU状态)</li>
 <li>读取下一个进程&#x2F;线程的上下文</li>
@@ -1248,10 +1225,7 @@
 </ul>
 <h2 id="优先级反转"><a href="#优先级反转" class="headerlink" title="优先级反转"></a>优先级反转</h2><p>可以发生在任务基于优先级的可抢占的调度机制中</p>
 <p>当系统内的环境强制使高优先级任务等待低优先级任务时发生</p>
-<h1 id="第九章"><a href="#第九章" class="headerlink" title="第九章"></a>第九章</h1><blockquote>
-<p>  第九章的主要内容是：同步</p>
-</blockquote>
-<h2 id="背景-1"><a href="#背景-1" class="headerlink" title="背景"></a>背景</h2><p>第一章到第八章内容, 到目前为止</p>
+<h1 id="第九章"><a href="#第九章" class="headerlink" title="第九章"></a>第九章</h1><h2 id="背景-1"><a href="#背景-1" class="headerlink" title="背景"></a>背景</h2><p>第一章到第八章内容, 到目前为止</p>
 <ul>
 <li>多道程序设计: 现代操作系统的重要特性</li>
 <li>并行很有用(为什么?) 提示: 多个并发实体: CPU IO 用户 等</li>
@@ -1456,10 +1430,7 @@
 </ul>
 </li>
 </ul>
-<h1 id="第十章"><a href="#第十章" class="headerlink" title="第十章"></a>第十章</h1><blockquote>
-<p>  第十章的主要内容是：信号量和管程</p>
-</blockquote>
-<h2 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h2><p>信号量的抽象数据类型</p>
+<h1 id="第十章"><a href="#第十章" class="headerlink" title="第十章"></a>第十章</h1><h2 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h2><p>信号量的抽象数据类型</p>
 <ul>
 <li>一个整形(sem),具有两个原子操作</li>
 <li>P(): sem减一,如果sem&lt;0,等待,否则继续</li>
@@ -1638,10 +1609,7 @@
 </ul>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> N 5</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LEFT (i + N - 1) % N <span class="comment">// 左邻居</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RIGHT (i + 1) % N    <span class="comment">// 右邻居</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> THINKING 0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HUNGRY   1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EATING   2</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">int</span> semaphore;</span><br><span class="line"><span class="type">int</span> state[N];                <span class="comment">// 跟踪每个哲学家的状态</span></span><br><span class="line">semaphore mutex = <span class="number">1</span>;         <span class="comment">// 临界区的互斥，临界区是 state 数组，对其修改需要互斥</span></span><br><span class="line">semaphore s[N];              <span class="comment">// 每个哲学家一个信号量</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">philosopher</span><span class="params">(<span class="type">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(TRUE) &#123;</span><br><span class="line">        <span class="built_in">think</span>(i);</span><br><span class="line">        <span class="built_in">take_two</span>(i);</span><br><span class="line">        <span class="built_in">eat</span>(i);</span><br><span class="line">        <span class="built_in">put_two</span>(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">take_two</span><span class="params">(<span class="type">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">down</span>(&amp;mutex);</span><br><span class="line">    state[i] = HUNGRY;</span><br><span class="line">    <span class="built_in">check</span>(i);</span><br><span class="line">    <span class="built_in">up</span>(&amp;mutex);</span><br><span class="line">    <span class="built_in">down</span>(&amp;s[i]); <span class="comment">// 只有收到通知之后才可以开始吃，否则会一直等下去</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">put_two</span><span class="params">(i)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">down</span>(&amp;mutex);</span><br><span class="line">    state[i] = THINKING;</span><br><span class="line">    <span class="built_in">check</span>(LEFT); <span class="comment">// 尝试通知左右邻居，自己吃完了，你们可以开始吃了</span></span><br><span class="line">    <span class="built_in">check</span>(RIGHT);</span><br><span class="line">    <span class="built_in">up</span>(&amp;mutex);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">eat</span><span class="params">(<span class="type">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">down</span>(&amp;mutex);</span><br><span class="line">    state[i] = EATING;</span><br><span class="line">    <span class="built_in">up</span>(&amp;mutex);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 检查两个邻居是否都没有用餐，如果是的话，就 up(&amp;s[i])，使得 down(&amp;s[i]) 能够得到通知并继续执行</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">check</span><span class="params">(i)</span> </span>&#123;         </span><br><span class="line">    <span class="keyword">if</span>(state[i] == HUNGRY &amp;&amp; state[LEFT] != EATING &amp;&amp; state[RIGHT] !=EATING) &#123;</span><br><span class="line">        state[i] = EATING;</span><br><span class="line">        <span class="built_in">up</span>(&amp;s[i]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ol>
-<h1 id="第十一章"><a href="#第十一章" class="headerlink" title="第十一章"></a>第十一章</h1><blockquote>
-<p>  第十一章的主要内容是：死锁和进程通信</p>
-</blockquote>
-<h2 id="死锁问题"><a href="#死锁问题" class="headerlink" title="死锁问题"></a>死锁问题</h2><p>一组阻塞的进程持有一种资源等待获取另一个进程所占有的一个资源</p>
+<h1 id="第十一章"><a href="#第十一章" class="headerlink" title="第十一章"></a>第十一章</h1><h2 id="死锁问题"><a href="#死锁问题" class="headerlink" title="死锁问题"></a>死锁问题</h2><p>一组阻塞的进程持有一种资源等待获取另一个进程所占有的一个资源</p>
 <p>示例:</p>
 <ul>
 <li>系统有2个磁带驱动器</li>
@@ -1880,10 +1848,7 @@
 <ul>
 <li>Socket</li>
 </ul>
-<h1 id="第十二章"><a href="#第十二章" class="headerlink" title="第十二章"></a>第十二章</h1><blockquote>
-<p>  第十二章的主要内容是：文件管理</p>
-</blockquote>
-<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="文件系统和文件"><a href="#文件系统和文件" class="headerlink" title="文件系统和文件"></a>文件系统和文件</h3><p>文件系统: 一种用于持久性存储的系统抽象</p>
+<h1 id="第十二章"><a href="#第十二章" class="headerlink" title="第十二章"></a>第十二章</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="文件系统和文件"><a href="#文件系统和文件" class="headerlink" title="文件系统和文件"></a>文件系统和文件</h3><p>文件系统: 一种用于持久性存储的系统抽象</p>
 <ul>
 <li>在存储上: 组织,控制,导航,访问和检索数据</li>
 <li>在大多数计算机系统包含文件系统</li>
